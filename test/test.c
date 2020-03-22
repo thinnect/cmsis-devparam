@@ -45,13 +45,16 @@ void test_discover_idx()
 void test_discover_by_name()
 {
 	uint32_t vu32 = 0;
+	uint8_t idx = 0;
 	DeviceParameterTypes_t tp = 0;
 
-	TEST_ASSERT_EQUAL_INT(sizeof(vu32), devp_discover_name("lifetime", &tp, &vu32, sizeof(vu32)));
+	TEST_ASSERT_EQUAL_INT(sizeof(vu32), devp_discover_name("lifetime", &idx, &tp, &vu32, sizeof(vu32)));
+	TEST_ASSERT_EQUAL_INT(0, idx);
 	TEST_ASSERT_EQUAL_INT(DP_TYPE_UINT32, tp);
 	TEST_ASSERT_EQUAL_INT(7, vu32);
 
-	TEST_ASSERT_EQUAL_INT(sizeof(vu32), devp_discover_name("uptime", &tp, &vu32, sizeof(vu32)));
+	TEST_ASSERT_EQUAL_INT(sizeof(vu32), devp_discover_name("uptime", &idx, &tp, &vu32, sizeof(vu32)));
+	TEST_ASSERT_EQUAL_INT(1, idx);
 	TEST_ASSERT_EQUAL_INT(DP_TYPE_UINT32, tp);
 	TEST_ASSERT_EQUAL_INT(7, vu32);
 }

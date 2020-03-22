@@ -66,7 +66,7 @@
 	} DeviceParameterTypes_t;
 
 	#pragma pack(push, 1)
-	typedef struct dp_heartbeat_t {
+	typedef struct dp_heartbeat {
 		uint8_t header;
 		uint8_t eui64[IEEE_EUI64_LENGTH]; // device EUI64
 		uint32_t uptime; // seconds
@@ -74,7 +74,7 @@
 	#pragma pack(pop)
 
 	#pragma pack(push, 1)
-	typedef struct dp_parameter_t {
+	typedef struct dp_parameter {
 		uint8_t header; // DP_FEATURE
 		uint8_t type;   // DeviceParameterTypes
 		uint8_t seqnum;
@@ -86,14 +86,14 @@
 	#pragma pack(pop)
 
 	#pragma pack(push, 1)
-	typedef struct dp_get_parameter_seqnum_t {
+	typedef struct dp_get_parameter_seqnum {
 		uint8_t header;
 		uint8_t seqnum;
 	} dp_get_parameter_seqnum_t;
 	#pragma pack(pop)
 
 	#pragma pack(push, 1)
-	typedef struct dp_get_parameter_id_t {
+	typedef struct dp_get_parameter_id {
 		uint8_t header;
 		uint8_t idlength;
 		char id[];
@@ -101,7 +101,7 @@
 	#pragma pack(pop)
 
 	#pragma pack(push, 1)
-	typedef struct dp_set_parameter_seqnum_t {
+	typedef struct dp_set_parameter_seqnum {
 		uint8_t header;
 		uint8_t seqnum;
 		uint8_t valuelength;
@@ -110,7 +110,7 @@
 	#pragma pack(pop)
 
 	#pragma pack(push, 1)
-	typedef struct dp_set_parameter_id_t {
+	typedef struct dp_set_parameter_id {
 		uint8_t header;
 		uint8_t idlength;
 		uint8_t valuelength;
@@ -120,7 +120,7 @@
 	#pragma pack(pop)
 
 	#pragma pack(push, 1)
-	typedef struct dp_error_parameter_seqnum_t {
+	typedef struct dp_error_parameter_seqnum {
 		uint8_t header;
 		uint8_t exists;
 		uint8_t error;
@@ -129,7 +129,7 @@
 	#pragma pack(pop)
 
 	#pragma pack(push, 1)
-	typedef struct dp_error_parameter_id_t {
+	typedef struct dp_error_parameter_id {
 		uint8_t header;
 		uint8_t exists;
 		uint8_t error;

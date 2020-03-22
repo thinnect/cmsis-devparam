@@ -1,0 +1,9 @@
+[submodule "test/zoo/thinnect.mist-comm"]
+	path = test/zoo/thinnect.mist-comm
+	url = https://github.com/thinnect/mist-comm.git
+[submodule "test/zoo/thinnect.cmsis-mock"]
+	path = test/zoo/thinnect.cmsis-mock
+	url = https://github.com/thinnect/cmsis-mock.git
+[submodule "test/zoo/thinnect.lll"]
+	path = test/zoo/thinnect.lll
+	url = https://github.com/thinnect/lll.git

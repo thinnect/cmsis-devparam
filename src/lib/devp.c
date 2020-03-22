@@ -1,3 +1,10 @@
+/**
+ * DeviceParamater parameter and storage handler.
+ *
+ * Copyright Thinnect Inc. 2020
+ * @author Raido Pahtma
+ * @license MIT
+ */
 
 #include <string.h>
 
@@ -31,40 +38,47 @@ int devp_register(devp_t * param)
 	return 0;
 }
 
-static devp_t * _devp_find(const char * name)
+static devp_t * _devp_find(const char * name, uint8_t * idx)
 {
 	// Search
+	uint8_t i = 0;
 	for (devp_t ** ppd = &(mp_params); *ppd != NULL; ppd = &((*ppd)->next))
 	{
 		if (0 == strcmp((*ppd)->name, name))
 		{
+			if(NULL != idx)
+			{
+				*idx = i;
+			}
 			return *ppd;
 		}
+		i++;
 	}
 	return NULL;
 }
 
 int devp_set(const char * name, DeviceParameterTypes_t type, void * value, uint8_t size)
 {
-	devp_t * pparam = _devp_find(name);
+	devp_t * pparam = _devp_find(name, NULL);
 	if (NULL == pparam)
 	{
-		return -1;
+		return DEVP_UNKNOWN;
 	}
 	if (pparam->type != type)
 	{
-		return -2;
+		return DEVP_ETYPE;
 	}
 
 	if (NULL == pparam->setf) // Read-Only
 	{
-		return -5;
+		return DEVP_EREADONLY;
 	}
 
 	// Set
-	if (0 != pparam->setf(pparam, false, value, size))
+	int ret = pparam->setf(pparam, false, value, size);
+	if (0 > ret)
 	{
-		return -3;
+		return ret;
 	}
 
 	// Persist
@@ -78,32 +92,32 @@ int devp_set(const char * name, DeviceParameterTypes_t type, void * value, uint8
 
 int devp_get(const char * name, DeviceParameterTypes_t type, void * value, uint8_t size)
 {
-	devp_t * pparam = _devp_find(name);
+	devp_t * pparam = _devp_find(name, NULL);
 	if (NULL == pparam)
 	{
-		return -1;
+		return DEVP_UNKNOWN;
 	}
 	if (pparam->type != type)
 	{
-		return -2;
+		return DEVP_ETYPE;
 	}
 	if (pparam->size > size) // Disregarding actual size for variable size parameters
 	{
-		return -4;
+		return DEVP_ESIZE;
 	}
 	return pparam->getf(pparam, value);
 }
 
-int devp_discover_name(const char * name, DeviceParameterTypes_t * type, void * value, uint8_t size)
+int devp_discover_name(const char * name, uint8_t * idx, DeviceParameterTypes_t * type, void * value, uint8_t size)
 {
-	devp_t * pparam = _devp_find(name);
+	devp_t * pparam = _devp_find(name, idx);
 	if (NULL == pparam)
 	{
-		return -1;
+		return DEVP_UNKNOWN;
 	}
 	if (pparam->size > size) // Disregarding actual size for variable size parameters
 	{
-		return -4;
+		return DEVP_ESIZE;
 	}
 	*type = pparam->type;
 	return pparam->getf(pparam, value);
@@ -116,7 +130,7 @@ int devp_discover_idx(uint8_t idx, const char ** name, DeviceParameterTypes_t * 
 	{
 		if(NULL == pparam)
 		{
-			return -1;
+			return DEVP_UNKNOWN;
 		}
 		if(i < idx)
 		{
@@ -126,7 +140,7 @@ int devp_discover_idx(uint8_t idx, const char ** name, DeviceParameterTypes_t * 
 
 	if(pparam->size > size)
 	{
-		return -4;
+		return DEVP_ESIZE;
 	}
 
 	*name = pparam->name;

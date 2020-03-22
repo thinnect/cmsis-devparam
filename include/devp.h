@@ -13,6 +13,15 @@
 
 #include "devp_protocol.h"
 
+typedef enum DevpErrors {
+	DEVP_UNKNOWN = -1,
+	DEVP_ESIZE = -2,
+	DEVP_EREADONLY = -3,
+	DEVP_EOFF = -4,
+	DEVP_EBUSY = -5,
+	DEVP_ETYPE = -6
+} devp_errors_t;
+
 typedef struct devp devp_t;
 
 /**
@@ -34,6 +43,15 @@ typedef int (* devp_get_f)(devp_t * param, void * value);
  * @return 0 for success.
  */
 typedef int (* devp_set_f)(devp_t * param, bool init, void * value, uint8_t size);
+
+/**
+ * A generic callback type to notify other modules about changes. Value must be
+ * queried separately.
+ *
+ * @param name - Name of the parameter that changed.
+ * @param user - User pointer provided during callback registration.
+ */
+typedef void (* devp_changed_cb_f)(const char * name, void * user);
 
 /**
  * Initialize module. Make sure to call this immediately after the kernel is
@@ -76,7 +94,7 @@ int devp_register(devp_t * param);
 int devp_set(const char * name, DeviceParameterTypes_t type, void * value, uint8_t size);
 int devp_get(const char * name, DeviceParameterTypes_t type, void * value, uint8_t size);
 
-int devp_discover_name(const char * name, DeviceParameterTypes_t * type, void * value, uint8_t size);
+int devp_discover_name(const char * name, uint8_t * idx, DeviceParameterTypes_t * type, void * value, uint8_t size);
 int devp_discover_idx(uint8_t idx, const char ** name, DeviceParameterTypes_t * type, void * value, uint8_t size);
 
 #endif//DEVP_H_
