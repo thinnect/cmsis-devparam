@@ -12,6 +12,7 @@
 #include <stdbool.h>
 
 #include "devp_protocol.h"
+#include "devp_storage.h"
 
 typedef enum DevpErrors {
 	DEVP_UNKNOWN = -1,

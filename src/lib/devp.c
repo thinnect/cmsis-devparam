@@ -9,12 +9,14 @@
 #include <string.h>
 
 #include "devp.h"
+#include "devp_storage.h"
 
 static devp_t * mp_params;
 
 void devp_init ()
 {
 	mp_params = NULL;
+	devp_storage_init(NULL);
 }
 
 void devp_gc ()
@@ -33,7 +35,15 @@ int devp_register(devp_t * param)
 
 	param->next = NULL;
 
-	// TODO search persistent storage for initialization value
+	if (param->persist)
+	{
+		uint8_t value[param->size];
+		int len = devp_storage_load(NULL, param->name, value, sizeof(value));
+		if (len >= 0) // TODO actual length check
+		{
+			param->setf(param, true, value, len);
+		}
+	}
 
 	return 0;
 }
@@ -84,7 +94,8 @@ int devp_set(const char * name, DeviceParameterTypes_t type, void * value, uint8
 	// Persist
 	if (pparam->persist)
 	{
-		// TODO
+		int len = devp_storage_save(NULL, pparam->name, value, size, pparam->size);
+		return len;
 	}
 
 	return 0;
