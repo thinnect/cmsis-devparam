@@ -25,7 +25,7 @@ static devp_t m_dp_radio_ch_default = {
 	.getf = dp_radio_ch_default_get,
 	.setf = dp_radio_ch_default_set
 };
-static uint8_t m_radio_ch_default = 0;
+static uint8_t m_radio_ch_default = DEFAULT_RADIO_CHANNEL;
 
 uint8_t get_radio_ch_default()
 {
@@ -91,7 +91,7 @@ static devp_t m_dp_radio_channel = {
 	.getf = dp_radio_channel_get,
 	.setf = dp_radio_channel_set
 };
-static uint8_t m_radio_channel = 0;
+static uint8_t m_radio_channel = DEFAULT_RADIO_CHANNEL;
 
 uint8_t get_radio_channel()
 {
@@ -126,6 +126,9 @@ void devp_radio_channel_init(devp_changed_cb_f callback, void * user)
 #ifndef DEVP_RADIO_CHANNEL_ONLY
 	devp_register(&m_dp_radio_ch_default);
 	devp_register(&m_dp_radio_ch_current);
+	#ifndef DEVP_RADIO_CHANNEL_PERSISTENT
+		m_radio_channel = m_radio_ch_default; // default would have been loaded from storage
+	#endif
 #endif//DEVP_RADIO_CHANNEL_ONLY
 	devp_register(&m_dp_radio_channel);
 }
