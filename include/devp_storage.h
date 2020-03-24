@@ -11,7 +11,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-typedef int devp_storage_t;
+typedef struct devp_storage
+{
+	int32_t f;
+} devp_storage_t;
 
 bool devp_storage_init(devp_storage_t * strg);
 int devp_storage_load(devp_storage_t * strg, const char * name, void * value, uint8_t length);
