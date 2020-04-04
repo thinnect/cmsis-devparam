@@ -4,11 +4,9 @@
  * Copyright Thinnect Inc. 2020
  * @license MIT
  */
-#include <string.h>
-
-#include "devp.h"
-
 #include "devp_radio_channel.h"
+
+#include <string.h>
 
 static devp_changed_cb_f m_changed_cb = NULL;
 static void * m_changed_user = NULL;
@@ -70,8 +68,9 @@ static int dp_radio_ch_current_get(devp_t * param, void * value)
 	if (NULL != m_get_current_func)
 	{
 		*((uint8_t*)value) = m_get_current_func();
+		return sizeof(uint8_t);
 	}
-	return -4;
+	return DEVP_UNKNOWN;
 }
 //------------------------------------------------------------------------------
 #endif//DEVP_RADIO_CHANNEL_ONLY
@@ -119,8 +118,9 @@ static int dp_radio_channel_set(devp_t * param, bool init, void * value, uint8_t
 }
 //------------------------------------------------------------------------------
 
-void devp_radio_channel_init(devp_changed_cb_f callback, void * user)
+void devp_radio_channel_init(get_radio_channel_f gcurrent, devp_changed_cb_f callback, void * user)
 {
+	m_get_current_func = gcurrent;
 	m_changed_cb = callback;
 	m_changed_user = user;
 #ifndef DEVP_RADIO_CHANNEL_ONLY
