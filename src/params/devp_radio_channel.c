@@ -40,12 +40,9 @@ static int dp_radio_ch_default_set(devp_t * param, bool init, void * value, uint
 {
 	uint8_t ov = m_radio_ch_default;
 	m_radio_ch_default = *((uint8_t*)value);
-	if (ov != m_radio_ch_default)
+	if ((false == init)&&(ov != m_radio_ch_default)&&(NULL != m_changed_cb))
 	{
-		if (NULL != m_changed_cb)
-		{
-			m_changed_cb(param->name, m_changed_user); // TODO Suspect this should be deferred?
-		}
+		m_changed_cb(param->name, m_changed_user); // TODO Suspect this should be deferred?
 	}
 	return 0;
 }
@@ -107,12 +104,9 @@ static int dp_radio_channel_set(devp_t * param, bool init, void * value, uint8_t
 {
 	uint8_t ov = m_radio_channel;
 	m_radio_channel = *((uint8_t*)value);
-	if (ov != m_radio_channel)
+	if ((false == init)&&(ov != m_radio_channel)&&(NULL != m_changed_cb))
 	{
-		if (NULL != m_changed_cb)
-		{
-			m_changed_cb(param->name, m_changed_user); // TODO Suspect this should be deferred?
-		}
+		m_changed_cb(param->name, m_changed_user); // TODO Suspect this should be deferred?
 	}
 	return 0;
 }

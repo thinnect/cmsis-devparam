@@ -9,13 +9,13 @@
 
 #include "devp.h"
 
-enum device_modes
+typedef enum device_modes
 {
 	DEVICE_MODE_GATEWAY,
 	DEVICE_MODE_SNIFFER,
 	DEVICE_MODE_CONNECTOR,
 	DEVICE_MODE_TOTAL_COUNT
-};
+} device_modes_t;
 
 void devp_device_mode_init(devp_changed_cb_f callback, void * user);
 
