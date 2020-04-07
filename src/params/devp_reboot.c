@@ -53,6 +53,10 @@ static int dp_reboot_set(devp_t * param, bool init, void * value, uint8_t size)
 	}
 	else
 	{
+		if(m_reboot_time < 1000)
+		{
+			m_reboot_time = 1000;
+		}
 		osTimerStart(m_reboot_timer, m_reboot_time);
 	}
 	return 0;
