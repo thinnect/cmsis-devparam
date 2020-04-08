@@ -278,7 +278,7 @@ static comms_error_t handle_rx()
 				{
 					dp_get_parameter_id_t* gf = (dp_get_parameter_id_t*)payload;
 
-					char name[17];
+					char name[24+1];
 					if (gf->idlength < sizeof(name))
 					{
 						uint8_t idx;
@@ -317,7 +317,7 @@ static comms_error_t handle_rx()
 					dp_set_parameter_id_t* sf = (dp_set_parameter_id_t*)payload;
 					if(len == sizeof(dp_set_parameter_id_t) + sf->idlength + sf->valuelength)
 					{
-						char name[17];
+						char name[24+1];
 
 						if (sf->idlength < sizeof(name))
 						{
