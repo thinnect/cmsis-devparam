@@ -15,12 +15,13 @@
 #include "devp_storage.h"
 
 typedef enum DevpErrors {
-	DEVP_UNKNOWN = -1,
-	DEVP_ESIZE = -2,
+	DEVP_UNKNOWN   = -1,
+	DEVP_ESIZE     = -2,
 	DEVP_EREADONLY = -3,
-	DEVP_EOFF = -4,
-	DEVP_EBUSY = -5,
-	DEVP_ETYPE = -6
+	DEVP_EOFF      = -4,
+	DEVP_EBUSY     = -5,
+	DEVP_ETYPE     = -6,
+	DEVP_EINVAL    = -7
 } devp_errors_t;
 
 typedef struct devp devp_t;
