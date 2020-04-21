@@ -114,10 +114,10 @@ static int dp_radio_channel_set(devp_t * param, bool init, void * value, uint8_t
 
 void devp_radio_channel_init(get_radio_channel_f gcurrent, devp_changed_cb_f callback, void * user)
 {
-	m_get_current_func = gcurrent;
 	m_changed_cb = callback;
 	m_changed_user = user;
 #ifndef DEVP_RADIO_CHANNEL_ONLY
+	m_get_current_func = gcurrent;
 	devp_register(&m_dp_radio_ch_default);
 	devp_register(&m_dp_radio_ch_current);
 	#ifndef DEVP_RADIO_CHANNEL_PERSISTENT
