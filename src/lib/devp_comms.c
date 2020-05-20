@@ -60,9 +60,11 @@ static void msg_send_done (comms_layer_t * comms, comms_msg_t * msg, comms_error
     osMutexRelease(m_mutex);
 }
 
-static comms_error_t errorSeqnum(comms_layer_t * comms, bool exists, int error, uint8_t seqnum)
+static comms_error_t errorSeqnum(comms_layer_t * comms, const comms_address_t * destination,
+                                 bool exists, int error, uint8_t seqnum)
 {
 	comms_init_message(comms, &m_msg);
+	comms_set_destination(comms, &m_msg, destination);
 
 	dp_error_parameter_seqnum_t* ep =
 	    (dp_error_parameter_seqnum_t*)comms_get_payload(comms, &m_msg, sizeof(dp_error_parameter_seqnum_t));
@@ -82,9 +84,11 @@ static comms_error_t errorSeqnum(comms_layer_t * comms, bool exists, int error, 
 	return COMMS_FAIL;
 }
 
-static comms_error_t errorId(comms_layer_t * comms, bool exists, int error, const char * idstr, uint8_t idlen)
+static comms_error_t errorId(comms_layer_t * comms, const comms_address_t * destination,
+                             bool exists, int error, const char * idstr, uint8_t idlen)
 {
 	comms_init_message(comms, &m_msg);
+	comms_set_destination(comms, &m_msg, destination);
 
 	dp_error_parameter_id_t* ep =
 	    (dp_error_parameter_id_t*)comms_get_payload(comms, &m_msg, sizeof(dp_error_parameter_id_t) + idlen);
@@ -105,11 +109,13 @@ static comms_error_t errorId(comms_layer_t * comms, bool exists, int error, cons
 	return COMMS_FAIL;
 }
 
-static comms_error_t sendValue(comms_layer_t * comms, const char* fid, uint8_t idx, uint8_t tp, void* value, uint8_t length)
+static comms_error_t sendValue(comms_layer_t * comms, const comms_address_t * destination,
+                               const char* fid, uint8_t idx, uint8_t tp, void* value, uint8_t length)
 {
 	debugb3("dp.v[%u] %s", value, length, idx, fid);
 
 	comms_init_message(comms, &m_msg);
+	comms_set_destination(comms, &m_msg, destination);
 
 	uint8_t idlen = strlen(fid);
 	dp_parameter_t* df =
@@ -234,8 +240,11 @@ static int setValue(const char * name, DeviceParameterTypes_t tp, void * value, 
 
 static comms_error_t handle_rx()
 {
+	comms_address_t client;
 	uint8_t len = comms_get_payload_length(m_rx_iface, &m_msg);
 	uint8_t * payload = (uint8_t*)comms_get_payload(m_rx_iface, &m_msg, len);
+
+	comms_get_source(m_rx_iface, &m_msg, &client);
 
 	debugb1("rcv[%p]", payload, len, m_rx_iface);
 	if ((len > 0)&&(NULL != payload))
@@ -259,17 +268,17 @@ static comms_error_t handle_rx()
 					int size = devp_discover_idx(gf->seqnum, &name, &tp, value, sizeof(value));
 					if(0 <= size)
 					{
-						return sendValue(m_rx_iface, name, gf->seqnum, tp, value, size);
+						return sendValue(m_rx_iface, &client, name, gf->seqnum, tp, value, size);
 					}
 					else
 					{
-						return errorSeqnum(m_rx_iface, DEVP_UNKNOWN != size, -DEVP_UNKNOWN, gf->seqnum);
+						return errorSeqnum(m_rx_iface, &client, DEVP_UNKNOWN != size, -DEVP_UNKNOWN, gf->seqnum);
 					}
 				}
 				else // Bad packet size
 				{
 					errb1("len", payload, len);
-					return errorId(m_rx_iface, false, -DEVP_UNKNOWN, "BAD REQ LEN", 11);
+					return errorId(m_rx_iface, &client, false, -DEVP_UNKNOWN, "BAD REQ LEN", 11);
 				}
 			break;
 
@@ -291,23 +300,23 @@ static comms_error_t handle_rx()
 						int size = devp_discover_name(name, &idx, &tp, (void*)value, sizeof(value));
 						if(0 <= size)
 						{
-							return sendValue(m_rx_iface, name, idx, tp, value, size);
+							return sendValue(m_rx_iface, &client, name, idx, tp, value, size);
 						}
 						else // No such parameter found
 						{
-							return errorId(m_rx_iface, DEVP_UNKNOWN != size, -size, name, gf->idlength);
+							return errorId(m_rx_iface, &client, DEVP_UNKNOWN != size, -size, name, gf->idlength);
 						}
 					}
 					else // No such parameter found
 					{
 						err1("id len %d", (int)gf->idlength);
-						return errorId(m_rx_iface, false, -DEVP_UNKNOWN, "BAD ID LEN", 10);
+						return errorId(m_rx_iface, &client, false, -DEVP_UNKNOWN, "BAD ID LEN", 10);
 					}
 				}
 				else // Bad packet size
 				{
 					errb1("len", payload, len);
-					return errorId(m_rx_iface, false, -DEVP_UNKNOWN, "BAD REQ LEN", 11);
+					return errorId(m_rx_iface, &client, false, -DEVP_UNKNOWN, "BAD REQ LEN", 11);
 				}
 			break;
 
@@ -338,36 +347,36 @@ static comms_error_t handle_rx()
 									size = devp_discover_name(name, &idx, &tp, (void*)value, sizeof(value));
 									if(0 <= size)
 									{
-										return sendValue(m_rx_iface, name, idx, tp, value, size);
+										return sendValue(m_rx_iface, &client, name, idx, tp, value, size);
 									}
 									else // Rather unexpected to fail here, but possible
 									{
 										warnb1("s %u", value, sf->valuelength, idx);
-										return errorId(m_rx_iface, true, -size, name, sf->idlength);
+										return errorId(m_rx_iface, &client, true, -size, name, sf->idlength);
 									}
 								}
 								else
 								{
 									warnb1("s %u", value, sf->valuelength, idx);
-									return errorId(m_rx_iface, true, -size, name, sf->idlength);
+									return errorId(m_rx_iface, &client, true, -size, name, sf->idlength);
 								}
 							}
 							else
 							{
 								warnb1("s %u", value, sf->valuelength, idx);
-								return errorId(m_rx_iface, DEVP_UNKNOWN != size, -size, name, sf->idlength);
+								return errorId(m_rx_iface, &client, DEVP_UNKNOWN != size, -size, name, sf->idlength);
 							}
 						}
 						else // Bad id len
 						{
 							err1("id len %d", (int)sf->idlength);
-							return errorId(m_rx_iface, false, -DEVP_UNKNOWN, "BAD ID LEN", 10);
+							return errorId(m_rx_iface, &client, false, -DEVP_UNKNOWN, "BAD ID LEN", 10);
 						}
 					}
 					else // Bad packet size
 					{
 						errb1("len", payload, len);
-						return errorId(m_rx_iface, false, -DEVP_UNKNOWN, "BAD REQ LEN", 11);
+						return errorId(m_rx_iface, &client, false, -DEVP_UNKNOWN, "BAD REQ LEN", 11);
 					}
 				}
 			break;
@@ -427,7 +436,7 @@ int devp_add_iface(comms_layer_t * comms, bool heartbeat)
 		{
 			m_ifaces[i] = comms;
 			m_heartbeat[i] = heartbeat;
-			comms_register_recv(comms, &(m_rcvrs[i]), receive_message, NULL, 0); // TODO AMID const
+			comms_register_recv(comms, &(m_rcvrs[i]), receive_message, NULL, AMID_DEVICE_PARAMETERS);
 			ret = i;
 			break;
 		}
