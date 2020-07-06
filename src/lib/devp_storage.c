@@ -15,11 +15,17 @@
 #define __LOG_LEVEL__ (LOG_LEVEL_devp_storage & BASE_LOG_LEVEL)
 #include "log.h"
 
+#ifndef DEVP_STORAGE_FS_ID
+#define DEVP_STORAGE_FS_ID 0
+#endif//DEVP_STORAGE_FS_ID
+
+#ifndef DEVP_STORAGE_FNAME
 #define DEVP_STORAGE_FNAME "devp1"
+#endif//DEVP_STORAGE_FNAME
 
 bool devp_storage_init(devp_storage_t * strg)
 {
-	strg->f = (int32_t)fs_open(DEVP_STORAGE_FNAME, SPIFFS_CREAT | SPIFFS_RDWR);
+	strg->f = (int32_t)fs_open(DEVP_STORAGE_FS_ID, DEVP_STORAGE_FNAME, SPIFFS_CREAT | SPIFFS_RDWR);
 	if (strg->f < 0)
 	{
 		warn1("fail");
@@ -54,17 +60,17 @@ static int find_parameter(fs_fd f, const char * name,
 {
 	uint32_t offs = 0;
 
-	fs_lseek(f, offs, SEEK_SET);
+	fs_lseek(DEVP_STORAGE_FS_ID, f, offs, SEEK_SET);
 
 	for (;;)
 	{
 		devp_storage_element_t record;
-		if (sizeof(record.tlen) == fs_read(f, &(record.tlen), sizeof(record.tlen)))
+		if (sizeof(record.tlen) == fs_read(DEVP_STORAGE_FS_ID, f, &(record.tlen), sizeof(record.tlen)))
 		{
 			offs += sizeof(record.tlen);
 			if((record.tlen >= DEVPS_RECORD_MIN_LENGTH)&&(record.tlen <= DEVPS_RECORD_MAX_LENGTH))
 			{
-				if(fs_read(f, record.name, record.tlen) == record.tlen)
+				if(fs_read(DEVP_STORAGE_FS_ID, f, record.name, record.tlen) == record.tlen)
 				{
 					offs += record.tlen;
 					// TODO check CRC
@@ -180,15 +186,15 @@ static bool write_record(fs_fd f, uint32_t offset, const char * name, uint8_t ma
 	((uint8_t*)&record)[wlen-1] = crc >> 8;
 	((uint8_t*)&record)[wlen-2] = crc;
 
-	fs_lseek(f, offset, SEEK_SET);
+	fs_lseek(DEVP_STORAGE_FS_ID, f, offset, SEEK_SET);
 	debugb1("write @%d", &record, wlen, (int)offset);
-	if(wlen != fs_write(f, &record, wlen))
+	if(wlen != fs_write(DEVP_STORAGE_FS_ID, f, &record, wlen))
 	{
 		err1("write");
 		return false;
 	}
 
-	fs_flush(f);
+	fs_flush(DEVP_STORAGE_FS_ID, f);
 	return true;
 }
 
@@ -208,7 +214,7 @@ int devp_storage_save(devp_storage_t * strg, const char * name, const void * val
 	if(r < 0)
 	{
 		warn1("erase"); // Something is broken, start from scratch
-		fs_unlink(DEVP_STORAGE_FNAME);
+		fs_unlink(DEVP_STORAGE_FS_ID, DEVP_STORAGE_FNAME);
 		devp_storage_init(strg);
 		offset = 0;
 		// TODO must also rewrite any other persistent parameters
@@ -218,7 +224,7 @@ int devp_storage_save(devp_storage_t * strg, const char * name, const void * val
 		if(maxlength > maxlen)
 		{
 			warn1("bad fit"); // Variable does not fit, start from scratch
-			fs_unlink(DEVP_STORAGE_FNAME);
+			fs_unlink(DEVP_STORAGE_FS_ID, DEVP_STORAGE_FNAME);
 			devp_storage_init(strg);
 			offset = 0;
 			// TODO must also rewrite any other persistent parameters
