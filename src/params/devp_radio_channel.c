@@ -72,6 +72,14 @@ static int dp_radio_ch_current_get(devp_t * param, void * value)
 //------------------------------------------------------------------------------
 #endif//DEVP_RADIO_CHANNEL_ONLY
 
+static uint8_t m_radio_channel = DEFAULT_RADIO_CHANNEL;
+
+uint8_t get_radio_channel()
+{
+	return m_radio_channel;
+}
+
+#if !defined(DEVP_RADIO_CHANNEL_REQUIRE_REBOOT) || defined(DEVP_RADIO_CHANNEL_PERSISTENT)
 //------------------------------------------------------------------------------
 static int dp_radio_channel_get(devp_t * param, void * value);
 static int dp_radio_channel_set(devp_t * param, bool init, void * value, uint8_t size);
@@ -87,12 +95,6 @@ static devp_t m_dp_radio_channel = {
 	.getf = dp_radio_channel_get,
 	.setf = dp_radio_channel_set
 };
-static uint8_t m_radio_channel = DEFAULT_RADIO_CHANNEL;
-
-uint8_t get_radio_channel()
-{
-	return m_radio_channel;
-}
 
 static int dp_radio_channel_get(devp_t * param, void * value)
 {
@@ -111,6 +113,7 @@ static int dp_radio_channel_set(devp_t * param, bool init, void * value, uint8_t
 	return 0;
 }
 //------------------------------------------------------------------------------
+#endif//!DEVP_RADIO_CHANNEL_REQUIRE_REBOOT || DEVP_RADIO_CHANNEL_PERSISTENT
 
 void devp_radio_channel_init(get_radio_channel_f gcurrent, devp_changed_cb_f callback, void * user)
 {
@@ -124,5 +127,7 @@ void devp_radio_channel_init(get_radio_channel_f gcurrent, devp_changed_cb_f cal
 		m_radio_channel = m_radio_ch_default; // default would have been loaded from storage
 	#endif
 #endif//DEVP_RADIO_CHANNEL_ONLY
+#if !defined(DEVP_RADIO_CHANNEL_REQUIRE_REBOOT) || defined(DEVP_RADIO_CHANNEL_PERSISTENT)
 	devp_register(&m_dp_radio_channel);
+#endif//DEVP_RADIO_CHANNEL_REQUIRE_REBOOT
 }
