@@ -18,7 +18,8 @@
 #define __LOG_LEVEL__ (LOG_LEVEL_devp_comms & BASE_LOG_LEVEL)
 #include "log.h"
 
-#define DEVP_FLAGS_RX (1 << 0)
+#define DEVP_FLAGS_RX    (1 << 0)
+#define DEVP_FLAGS_SLEEP (1 << 1)
 #define DEVP_FLAGS_ALL 0x7FFFFFFF
 
 #ifndef DEVP_MAX_IFACES
@@ -29,15 +30,26 @@
 #define DEVP_MAX_VALUE_SIZE 64
 #endif//DEVP_MAX_VALUE_SIZE
 
+#ifndef DEVP_SLEEP_TIMEOUT_MS
+#define DEVP_SLEEP_TIMEOUT_MS 5000
+#endif//DEVP_SLEEP_TIMEOUT_MS
+
 static osMutexId_t m_mutex;
 static osThreadId_t m_devp_thread_id;
+static osTimerId_t m_sleep_timer;
 static comms_msg_t m_msg;
 static bool m_busy;
 static comms_layer_t * m_rx_iface;
 
-static comms_layer_t * m_ifaces[DEVP_MAX_IFACES];
+static comms_layer_t * mp_ifaces[DEVP_MAX_IFACES];
+static comms_sleep_controller_t * mp_sleep_ctrl[DEVP_MAX_IFACES];
 static bool m_heartbeat[DEVP_MAX_IFACES];
 static comms_receiver_t m_rcvrs[DEVP_MAX_IFACES];
+
+static void radio_status_changed(comms_layer_t* comms, comms_status_t status, void* user)
+{
+    // Actual status change is checked by polling during startup, but the callback is mandatory
+}
 
 static void receive_message (comms_layer_t * comms, const comms_msg_t* msg, void * user)
 {
@@ -400,20 +412,54 @@ static void devp_comms_loop()
 			{
 				m_busy = false;
 			}
+			else // Something is happening, keep the interface awake for a bit
+			{
+				for (int i=0;i<DEVP_MAX_IFACES;i++)
+				{
+					if(m_rx_iface == mp_ifaces[i])
+					{
+						if(NULL != mp_sleep_ctrl[i]) // Sleep control is optional
+						{
+							debug1("block %d", i);
+							comms_sleep_block(mp_sleep_ctrl[i]);
+							osTimerStart(m_sleep_timer, DEVP_SLEEP_TIMEOUT_MS);
+						}
+						break;
+					}
+				}
+
+			}
 			osMutexRelease(m_mutex);
 		}
+		if (flags & DEVP_FLAGS_SLEEP) // All interfaces put to sleep together
+		{
+			for(int i=0;i<DEVP_MAX_IFACES;i++)
+			{
+				if (NULL != mp_sleep_ctrl[i])
+				{
+					debug1("sleep %d", i);
+					comms_sleep_allow(mp_sleep_ctrl[i]);
+				}
+			}
+		}
 	}
+}
+
+static void sleep_timer_fired_cb()
+{
+	osThreadFlagsSet(m_devp_thread_id, DEVP_FLAGS_SLEEP);
 }
 
 void devp_comms_init()
 {
 	m_mutex = osMutexNew(NULL);
+	m_sleep_timer = osTimerNew(sleep_timer_fired_cb, osTimerOnce, NULL, NULL);
 
 	m_busy = false;
 
 	for(uint8_t i=0;i<DEVP_MAX_IFACES;i++)
 	{
-		m_ifaces[i] = NULL;
+		mp_ifaces[i] = NULL;
 	}
 
     // Create a thread
@@ -421,21 +467,28 @@ void devp_comms_init()
     m_devp_thread_id = osThreadNew(devp_comms_loop, NULL, &thread_attr);
 }
 
-int devp_add_iface(comms_layer_t * comms, bool heartbeat)
+int devp_add_iface(comms_layer_t * comms, comms_sleep_controller_t * ctrl, bool heartbeat)
 {
 	int ret = -1;
 	while(osOK != osMutexAcquire(m_mutex, osWaitForever));
 	for(uint8_t i=0;i<DEVP_MAX_IFACES;i++)
 	{
-		if(m_ifaces[i] == comms)
+		if(mp_ifaces[i] == comms)
 		{
 			ret = -2;
 			break;
 		}
-		else if(NULL == m_ifaces[i])
+		else if(NULL == mp_ifaces[i])
 		{
-			m_ifaces[i] = comms;
+			mp_ifaces[i] = comms;
+			mp_sleep_ctrl[i] = ctrl;
 			m_heartbeat[i] = heartbeat;
+
+			if(NULL != ctrl)
+			{
+				comms_register_sleep_controller(comms, ctrl, radio_status_changed, NULL);
+			}
+
 			comms_register_recv(comms, &(m_rcvrs[i]), receive_message, NULL, AMID_DEVICE_PARAMETERS);
 			ret = i;
 			break;
@@ -451,10 +504,17 @@ int devp_remove_iface(comms_layer_t * comms)
 	while(osOK != osMutexAcquire(m_mutex, osWaitForever));
 	for(uint8_t i=0;i<DEVP_MAX_IFACES;i++)
 	{
-		if(m_ifaces[i] == comms)
+		if(mp_ifaces[i] == comms)
 		{
 			comms_deregister_recv(comms, &(m_rcvrs[i]));
-			m_ifaces[i] = NULL;
+
+			if (NULL != mp_sleep_ctrl[i])
+			{
+				comms_deregister_sleep_controller(comms, mp_sleep_ctrl[i]);
+				mp_sleep_ctrl[i] = NULL;
+			}
+
+			mp_ifaces[i] = NULL;
 			ret = i;
 			break;
 		}

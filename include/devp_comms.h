@@ -17,7 +17,7 @@
 
 void devp_comms_init();
 
-int devp_add_iface(comms_layer_t * comms, bool heartbeat);
+int devp_add_iface(comms_layer_t * comms, comms_sleep_controller_t * ctrl, bool heartbeat);
 int devp_remove_iface(comms_layer_t * comms);
 
 #endif//DEVP_COMMS_H_
