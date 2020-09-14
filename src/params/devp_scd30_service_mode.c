@@ -426,8 +426,8 @@ static int dp_scd_frc_set(devp_t * param, bool init, void * value, uint8_t size)
 
 static devp_t m_dp_scd_frc = {
 	.name = "scd_co2_frc",
-	.type = DP_TYPE_INT16,
-	.size = sizeof(int16_t),
+	.type = DP_TYPE_UINT16,
+	.size = sizeof(uint16_t),
 	.persist = false,
 	.getf = dp_scd_frc_get,
 	.setf = dp_scd_frc_set
@@ -439,7 +439,7 @@ static int dp_scd_frc_get(devp_t * param, void * value)
 	{
 		if(0 == scd30_get_forced_calibration(value))
 		{
-			return sizeof(int16_t);
+			return sizeof(uint16_t);
 		}
 		return DEVP_EINVAL;
 	}
@@ -448,7 +448,7 @@ static int dp_scd_frc_get(devp_t * param, void * value)
 
 static int dp_scd_frc_set(devp_t * param, bool init, void * value, uint8_t size)
 {
-	if (sizeof(int16_t) == size)
+	if (sizeof(uint16_t) == size)
 	{
 		if (m_scd_service_mode)
 		{
