@@ -6,10 +6,8 @@
  */
 #include "devp_noise_params.h"
 
-#include "endianness.h" // manual endianness conversions because using RAW type
-
-static int dp_noise_params_get_offset(devp_t * param, void * value);
-static int dp_noise_params_set_offset(devp_t * param, bool init, void * value, uint8_t size);
+static int dp_noise_params_get_offset (devp_t * param, void * value);
+static int dp_noise_params_set_offset (devp_t * param, bool init, void * value, uint8_t size);
 
 static devp_t m_dp_noise_offset = {
 	.name = "noise_offset",
