@@ -18,7 +18,7 @@ static devp_t m_dp_noise_offset = {
 	.setf = dp_noise_params_set_offset
 };
 
-static uint16_t m_noise_offset;
+static uint8_t m_noise_offset;
 
 int dp_noise_params_get_offset (devp_t * param, void * value)
 {
