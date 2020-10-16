@@ -162,17 +162,26 @@ static comms_error_t sendValue(comms_layer_t * comms, const comms_address_t * de
 
 				case DP_ARRAY_UINT16:
 				case DP_ARRAY_INT16:
-					// TODO
+					for(uint8_t i=0;i<length/sizeof(uint16_t);i++)
+					{
+						*(((uint16_t*)pv)+i) = hton16(*(((uint16_t*)value)+i));
+					}
 				break;
 
 				case DP_ARRAY_UINT32:
 				case DP_ARRAY_INT32:
-					// TODO
+					for(uint8_t i=0;i<length/sizeof(uint32_t);i++)
+					{
+						*(((uint32_t*)pv)+i) = hton32(*(((uint32_t*)value)+i));
+					}
 				break;
 
 				case DP_ARRAY_UINT64:
 				case DP_ARRAY_INT64:
-					// TODO
+					for(uint8_t i=0;i<length/sizeof(uint64_t);i++)
+					{
+						*(((uint64_t*)pv)+i) = hton64(*(((uint64_t*)value)+i));
+					}
 				break;
 
 				default:
@@ -222,21 +231,33 @@ static int setValue(const char * name, DeviceParameterTypes_t tp, void * value, 
 		case DP_ARRAY_UINT16:
 		case DP_ARRAY_INT16:
 		{
-			return -9; // TODO
+			for(uint8_t i=0;i<size/sizeof(uint16_t);i++)
+			{
+				*(((uint16_t*)value)+i) = ntoh16(*(((uint16_t*)value)+i));
+			}
+			return devp_set(name, tp, value, size);
 		}
 		break;
 
 		case DP_ARRAY_UINT32:
 		case DP_ARRAY_INT32:
 		{
-			return -9; // TODO
+			for(uint8_t i=0;i<size/sizeof(uint32_t);i++)
+			{
+				*(((uint32_t*)value)+i) = ntoh32(*(((uint32_t*)value)+i));
+			}
+			return devp_set(name, tp, value, size);
 		}
 		break;
 
 		case DP_ARRAY_UINT64:
 		case DP_ARRAY_INT64:
 		{
-			return -9; // TODO
+			for(uint8_t i=0;i<size/sizeof(uint64_t);i++)
+			{
+				*(((uint64_t*)value)+i) = ntoh64(*(((uint64_t*)value)+i));
+			}
+			return devp_set(name, tp, value, size);
 		}
 		break;
 
