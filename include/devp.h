@@ -44,7 +44,7 @@ typedef int (* devp_get_f)(devp_t * param, void * value);
  * @param value - pointer to the value according to the registered type and length.
  * @return 0 for success.
  */
-typedef int (* devp_set_f)(devp_t * param, bool init, void * value, uint8_t size);
+typedef int (* devp_set_f)(devp_t * param, bool init, const void * value, uint8_t size);
 
 /**
  * A generic callback type to notify other modules about changes. Value must be
@@ -59,14 +59,14 @@ typedef void (* devp_changed_cb_f)(const char * name, void * user);
  * Initialize module. Make sure to call this immediately after the kernel is
  * started and before initializing any components that register parameters.
  */
-void devp_init();
+void devp_init ();
 
 /**
  * Perform garbage collection on the stored variables. Do this after all
  * variables have been registered, it will discard any stored variables it
  * does not recognize.
  */
-void devp_gc();
+void devp_gc ();
 
 // -----------------------------------------------------------------------------
 struct devp
@@ -89,14 +89,64 @@ struct devp
  * @param param - Initialized memory for parameter, must remain available and
  *                must not be modified directly after initialization.
  */
-int devp_register(devp_t * param);
+int devp_register (devp_t * param);
 // -----------------------------------------------------------------------------
 
+/**
+ * Set a parameter by name and type.
+ *
+ * @param name Name of the parameter.
+ * @param type Type of the parameter.
+ * @param value Value of the parameter.
+ * @param size Size of the value.
+ * @return < 0 for error.
+ */
+int devp_set (const char * name, DeviceParameterTypes_t type, const void * value, uint8_t size);
 
-int devp_set(const char * name, DeviceParameterTypes_t type, void * value, uint8_t size);
-int devp_get(const char * name, DeviceParameterTypes_t type, void * value, uint8_t size);
+/**
+ * Get a parameter by name and type.
+ *
+ * @param name Name of the parameter.
+ * @param type Type of the parameter.
+ * @param value Memory for storing the value.
+ * @param size Available space for storing the value.
+ * @return Size of the parameter.
+ */
+int devp_get (const char * name, DeviceParameterTypes_t type, void * value, uint8_t size);
 
-int devp_discover_name(const char * name, uint8_t * idx, DeviceParameterTypes_t * type, void * value, uint8_t size);
-int devp_discover_idx(uint8_t idx, const char ** name, DeviceParameterTypes_t * type, void * value, uint8_t size);
+/**
+ * Store the parameter in persistent storage directly (assuming it is a persistent parameter).
+ *
+ * @param name Name of the parameter.
+ * @param type Type of the parameter.
+ * @param value Memory for storing the value.
+ * @param size Available space for storing the value.
+ * @return Size of the parameter.
+ */
+int devp_store (const char * name, DeviceParameterTypes_t type, const void * value, uint8_t size);
+
+/**
+ * Get a parameter by name.
+ *
+ * @param name Name of the parameter.
+ * @param idx Index of the parameter.
+ * @param type Type of the parameter.
+ * @param value Memory for storing the value.
+ * @param size Available space for storing the value.
+ * @return Size of the parameter.
+ */
+int devp_discover_name (const char * name, uint8_t * idx, DeviceParameterTypes_t * type, void * value, uint8_t size);
+
+/**
+ * Get a parameter by index.
+ *
+ * @param idx Index of the parameter.
+ * @param name Memory for storing the name of the parameter (17 bytes).
+ * @param type Type of the parameter.
+ * @param value Memory for storing the value.
+ * @param size Available space for storing the value.
+ * @return Size of the parameter.
+ */
+int devp_discover_idx (uint8_t idx, const char ** name, DeviceParameterTypes_t * type, void * value, uint8_t size);
 
 #endif//DEVP_H_

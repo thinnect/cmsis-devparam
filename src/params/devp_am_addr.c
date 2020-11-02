@@ -11,7 +11,7 @@
 #include "endianness.h" // manual endianness conversions because using RAW type
 
 static int dp_am_addr_get(devp_t * param, void * value);
-static int dp_am_addr_set(devp_t * param, bool init, void * value, uint8_t size);
+static int dp_am_addr_set(devp_t * param, bool init, const void * value, uint8_t size);
 
 static devp_t m_dp_am_addr = {
 	.name = "am_addr",
@@ -30,7 +30,7 @@ static int dp_am_addr_get(devp_t * param, void * value)
 	return sizeof(uint16_t);
 }
 
-static int dp_am_addr_set(devp_t * param, bool init, void * value, uint8_t size)
+static int dp_am_addr_set(devp_t * param, bool init, const void * value, uint8_t size)
 {
 	m_am_addr = ntoh16(*((uint16_t*)value));
 	return 0;

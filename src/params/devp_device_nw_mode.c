@@ -16,7 +16,7 @@ static const char * device_nw_mode_strings[] = {
 #define DEVP_DEVICE_NW_MODE_STRLEN 2
 
 static int dp_default_nw_mode_get(devp_t * param, void * value);
-static int dp_default_nw_mode_set(devp_t * param, bool init, void * value, uint8_t size);
+static int dp_default_nw_mode_set(devp_t * param, bool init, const void * value, uint8_t size);
 static devp_t m_dp_default_nw_mode = {
 	.name = "default_nw_mode",
 	.type = DP_TYPE_STRING,
@@ -34,7 +34,7 @@ static int dp_default_nw_mode_get(devp_t * param, void * value)
 	return len;
 }
 
-static int dp_default_nw_mode_set(devp_t * param, bool init, void * value, uint8_t size)
+static int dp_default_nw_mode_set(devp_t * param, bool init, const void * value, uint8_t size)
 {
 	for (uint8_t i=0;i<DEVICE_NW_MODE_TOTAL_COUNT;i++)
 	{

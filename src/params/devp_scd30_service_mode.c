@@ -167,7 +167,7 @@ static bool scd_get(float * pco2, float * ptmp, float * phum)
 
 // -----------------------------------------------------------------------------
 static int dp_scd_service_mode_get(devp_t * param, void * value);
-static int dp_scd_service_mode_set(devp_t * param, bool init, void * value, uint8_t size);
+static int dp_scd_service_mode_set(devp_t * param, bool init, const void * value, uint8_t size);
 
 static devp_t m_dp_scd_service_mode = {
 	.name = "scd_service_mode",
@@ -184,7 +184,7 @@ static int dp_scd_service_mode_get(devp_t * param, void * value)
 	return sizeof(bool);
 }
 
-static int dp_scd_service_mode_set(devp_t * param, bool init, void * value, uint8_t size)
+static int dp_scd_service_mode_set(devp_t * param, bool init, const void * value, uint8_t size)
 {
 	bool mode = *(bool*)value;
 	if (mode != m_scd_service_mode)
@@ -376,7 +376,7 @@ static int dp_scd_hum_get(devp_t * param, void * value)
 
 // -----------------------------------------------------------------------------
 static int dp_scd_tempoffs_get(devp_t * param, void * value);
-static int dp_scd_tempoffs_set(devp_t * param, bool init, void * value, uint8_t size);
+static int dp_scd_tempoffs_set(devp_t * param, bool init, const void * value, uint8_t size);
 
 static devp_t m_dp_scd_tempoffs = {
 	.name = "scd_tempoffs",
@@ -400,7 +400,7 @@ static int dp_scd_tempoffs_get(devp_t * param, void * value)
 	return DEVP_EOFF;
 }
 
-static int dp_scd_tempoffs_set(devp_t * param, bool init, void * value, uint8_t size)
+static int dp_scd_tempoffs_set(devp_t * param, bool init, const void * value, uint8_t size)
 {
 	if (sizeof(uint16_t) == size)
 	{
@@ -422,7 +422,7 @@ static int dp_scd_tempoffs_set(devp_t * param, bool init, void * value, uint8_t 
 
 // -----------------------------------------------------------------------------
 static int dp_scd_frc_get(devp_t * param, void * value);
-static int dp_scd_frc_set(devp_t * param, bool init, void * value, uint8_t size);
+static int dp_scd_frc_set(devp_t * param, bool init, const void * value, uint8_t size);
 
 static devp_t m_dp_scd_frc = {
 	.name = "scd_co2_frc",
@@ -446,7 +446,7 @@ static int dp_scd_frc_get(devp_t * param, void * value)
 	return DEVP_EOFF;
 }
 
-static int dp_scd_frc_set(devp_t * param, bool init, void * value, uint8_t size)
+static int dp_scd_frc_set(devp_t * param, bool init, const void * value, uint8_t size)
 {
 	if (sizeof(uint16_t) == size)
 	{
@@ -468,7 +468,7 @@ static int dp_scd_frc_set(devp_t * param, bool init, void * value, uint8_t size)
 
 // -----------------------------------------------------------------------------
 static int dp_scd_asc_get(devp_t * param, void * value);
-static int dp_scd_asc_set(devp_t * param, bool init, void * value, uint8_t size);
+static int dp_scd_asc_set(devp_t * param, bool init, const void * value, uint8_t size);
 
 static devp_t m_dp_scd_asc = {
 	.name = "scd_co2_asc",
@@ -493,7 +493,7 @@ static int dp_scd_asc_get(devp_t * param, void * value)
 	return DEVP_EOFF;
 }
 
-static int dp_scd_asc_set(devp_t * param, bool init, void * value, uint8_t size)
+static int dp_scd_asc_set(devp_t * param, bool init, const void * value, uint8_t size)
 {
 	if (sizeof(uint8_t) == size)
 	{

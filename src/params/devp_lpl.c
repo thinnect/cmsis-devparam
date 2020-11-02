@@ -7,7 +7,7 @@
 #include "devp_lpl.h"
 
 static int dp_lpl_remote_wakeup_get(devp_t * param, void * value);
-static int dp_lpl_remote_wakeup_set(devp_t * param, bool init, void * value, uint8_t size);
+static int dp_lpl_remote_wakeup_set(devp_t * param, bool init, const void * value, uint8_t size);
 
 static devp_t m_dp_lpl_remote_wakeup = {
 	.name = "lpl_remote_wakeup",
@@ -26,7 +26,7 @@ static int dp_lpl_remote_wakeup_get(devp_t * param, void * value)
 	return sizeof(uint16_t);
 }
 
-static int dp_lpl_remote_wakeup_set(devp_t * param, bool init, void * value, uint8_t size)
+static int dp_lpl_remote_wakeup_set(devp_t * param, bool init, const void * value, uint8_t size)
 {
 	m_lpl_remote_wakeup = *((uint16_t*)value);
 	return 0;

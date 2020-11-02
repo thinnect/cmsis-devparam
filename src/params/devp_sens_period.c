@@ -7,7 +7,7 @@
 #include "devp_sens_period.h"
 
 static int dp_sens_period_get(devp_t * param, void * value);
-static int dp_sens_period_set(devp_t * param, bool init, void * value, uint8_t size);
+static int dp_sens_period_set(devp_t * param, bool init, const void * value, uint8_t size);
 
 static devp_t m_dp_sens_period = {
 	.name = "sens_period_s",
@@ -26,7 +26,7 @@ static int dp_sens_period_get(devp_t * param, void * value)
 	return sizeof(uint16_t);
 }
 
-static int dp_sens_period_set(devp_t * param, bool init, void * value, uint8_t size)
+static int dp_sens_period_set(devp_t * param, bool init, const void * value, uint8_t size)
 {
 	m_sens_period = *((uint16_t*)value);
 	return 0;

@@ -32,7 +32,7 @@ static devp_changed_cb_f m_changed_cb = NULL;
 static void * m_changed_user = NULL;
 
 static int dp_default_mode_get(devp_t * param, void * value);
-static int dp_default_mode_set(devp_t * param, bool init, void * value, uint8_t size);
+static int dp_default_mode_set(devp_t * param, bool init, const void * value, uint8_t size);
 static devp_t m_dp_default_mode = {
 	.name = "default_mode",
 	.type = DP_TYPE_STRING,
@@ -50,7 +50,7 @@ static int dp_default_mode_get(devp_t * param, void * value)
 	return len;
 }
 
-static int dp_default_mode_set(devp_t * param, bool init, void * value, uint8_t size)
+static int dp_default_mode_set(devp_t * param, bool init, const void * value, uint8_t size)
 {
 	for (uint8_t i=0;i<DEVICE_MODE_TOTAL_COUNT;i++)
 	{
@@ -67,7 +67,7 @@ static int dp_default_mode_set(devp_t * param, bool init, void * value, uint8_t 
 }
 
 static int dp_mode_get(devp_t * param, void * value);
-static int dp_mode_set(devp_t * param, bool init, void * value, uint8_t size);
+static int dp_mode_set(devp_t * param, bool init, const void * value, uint8_t size);
 static devp_t m_dp_mode = {
 	.name = "mode",
 	.type = DP_TYPE_STRING,
@@ -85,7 +85,7 @@ static int dp_mode_get(devp_t * param, void * value)
 	return len;
 }
 
-static int dp_mode_set(devp_t * param, bool init, void * value, uint8_t size)
+static int dp_mode_set(devp_t * param, bool init, const void * value, uint8_t size)
 {
 	bool ok = false;;
 

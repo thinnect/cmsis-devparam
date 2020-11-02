@@ -16,7 +16,7 @@ static uint16_t m_scd_warmup_s = 60; // Seconds
 
 // Temperature in degrees * 10 -------------------------------------------------
 static int dp_scd_temp_offset_get (devp_t * param, void * value);
-static int dp_scd_temp_offset_set (devp_t * param, bool init, void * value, uint8_t size);
+static int dp_scd_temp_offset_set (devp_t * param, bool init, const void * value, uint8_t size);
 
 static devp_t m_dp_scd_temp_offset = {
 	.name = "scd_temp_offset",
@@ -33,7 +33,7 @@ static int dp_scd_temp_offset_get (devp_t * param, void * value)
 	return sizeof(int16_t);
 }
 
-static int dp_scd_temp_offset_set (devp_t * param, bool init, void * value, uint8_t size)
+static int dp_scd_temp_offset_set (devp_t * param, bool init, const void * value, uint8_t size)
 {
 	m_scd_temp_offset = *((int16_t*)value);
 	return 0;
@@ -43,7 +43,7 @@ static int dp_scd_temp_offset_set (devp_t * param, bool init, void * value, uint
 
 // Relative humidity in % * 10 -------------------------------------------------
 static int dp_scd_rh_offset_get (devp_t * param, void * value);
-static int dp_scd_rh_offset_set (devp_t * param, bool init, void * value, uint8_t size);
+static int dp_scd_rh_offset_set (devp_t * param, bool init, const void * value, uint8_t size);
 
 static devp_t m_dp_scd_rh_offset = {
 	.name = "scd_rh_offset",
@@ -60,7 +60,7 @@ static int dp_scd_rh_offset_get (devp_t * param, void * value)
 	return sizeof(int16_t);
 }
 
-static int dp_scd_rh_offset_set (devp_t * param, bool init, void * value, uint8_t size)
+static int dp_scd_rh_offset_set (devp_t * param, bool init, const void * value, uint8_t size)
 {
 	m_scd_rh_offset = *((int16_t*)value);
 	return 0;
@@ -70,7 +70,7 @@ static int dp_scd_rh_offset_set (devp_t * param, bool init, void * value, uint8_
 
 // CO2 in ppm ------------------------------------------------------------------
 static int dp_scd_co2_offset_get (devp_t * param, void * value);
-static int dp_scd_co2_offset_set (devp_t * param, bool init, void * value, uint8_t size);
+static int dp_scd_co2_offset_set (devp_t * param, bool init, const void * value, uint8_t size);
 
 static devp_t m_dp_scd_co2_offset = {
 	.name = "scd_co2_offset",
@@ -87,7 +87,7 @@ static int dp_scd_co2_offset_get (devp_t * param, void * value)
 	return sizeof(int16_t);
 }
 
-static int dp_scd_co2_offset_set (devp_t * param, bool init, void * value, uint8_t size)
+static int dp_scd_co2_offset_set (devp_t * param, bool init, const void * value, uint8_t size)
 {
 	m_scd_co2_offset = *((int16_t*)value);
 	return 0;
@@ -97,7 +97,7 @@ static int dp_scd_co2_offset_set (devp_t * param, bool init, void * value, uint8
 
 // Warmup ----------------------------------------------------------------------
 static int dp_scd_warmup_get (devp_t * param, void * value);
-static int dp_scd_warmup_set (devp_t * param, bool init, void * value, uint8_t size);
+static int dp_scd_warmup_set (devp_t * param, bool init, const void * value, uint8_t size);
 
 static devp_t m_dp_scd_warmup = {
 	.name = "scd_warmup_s",
@@ -114,7 +114,7 @@ static int dp_scd_warmup_get (devp_t * param, void * value)
 	return sizeof(int16_t);
 }
 
-static int dp_scd_warmup_set (devp_t * param, bool init, void * value, uint8_t size)
+static int dp_scd_warmup_set (devp_t * param, bool init, const void * value, uint8_t size)
 {
 	m_scd_warmup_s = *((int16_t*)value);
 	return 0;

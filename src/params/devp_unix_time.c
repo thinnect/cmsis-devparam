@@ -15,7 +15,7 @@
 static devp_unix_time_changed_f mf_unix_time_changed;
 
 static int dp_unix_time_get(devp_t * param, void * value);
-static int dp_unix_time_set(devp_t * param, bool init, void * value, uint8_t size);
+static int dp_unix_time_set(devp_t * param, bool init, const void * value, uint8_t size);
 
 static devp_t m_dp_unix_time = {
 	.name = "unix_time",
@@ -32,7 +32,7 @@ static int dp_unix_time_get(devp_t * param, void * value)
 	return sizeof(int64_t);
 }
 
-static int dp_unix_time_set(devp_t * param, bool init, void * value, uint8_t size)
+static int dp_unix_time_set(devp_t * param, bool init, const void * value, uint8_t size)
 {
 	if(sizeof(int64_t) != size)
 	{

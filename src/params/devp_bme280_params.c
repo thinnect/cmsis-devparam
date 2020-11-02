@@ -15,7 +15,7 @@ static int16_t m_bme_pressure_offset; // Pa
 
 // Temperature in degrees * 10 -------------------------------------------------
 static int dp_bme_temp_offset_get (devp_t * param, void * value);
-static int dp_bme_temp_offset_set (devp_t * param, bool init, void * value, uint8_t size);
+static int dp_bme_temp_offset_set (devp_t * param, bool init, const void * value, uint8_t size);
 
 static devp_t m_dp_bme_temp_offset = {
 	.name = "bme_temp_offset",
@@ -32,7 +32,7 @@ static int dp_bme_temp_offset_get (devp_t * param, void * value)
 	return sizeof(int16_t);
 }
 
-static int dp_bme_temp_offset_set (devp_t * param, bool init, void * value, uint8_t size)
+static int dp_bme_temp_offset_set (devp_t * param, bool init, const void * value, uint8_t size)
 {
 	m_bme_temp_offset = *((int16_t*)value);
 	return 0;
@@ -42,7 +42,7 @@ static int dp_bme_temp_offset_set (devp_t * param, bool init, void * value, uint
 
 // Relative humidity in % * 10 -------------------------------------------------
 static int dp_bme_rh_offset_get (devp_t * param, void * value);
-static int dp_bme_rh_offset_set (devp_t * param, bool init, void * value, uint8_t size);
+static int dp_bme_rh_offset_set (devp_t * param, bool init, const void * value, uint8_t size);
 
 static devp_t m_dp_bme_rh_offset = {
 	.name = "bme_rh_offset",
@@ -59,7 +59,7 @@ static int dp_bme_rh_offset_get (devp_t * param, void * value)
 	return sizeof(int16_t);
 }
 
-static int dp_bme_rh_offset_set (devp_t * param, bool init, void * value, uint8_t size)
+static int dp_bme_rh_offset_set (devp_t * param, bool init, const void * value, uint8_t size)
 {
 	m_bme_rh_offset = *((int16_t*)value);
 	return 0;
@@ -69,7 +69,7 @@ static int dp_bme_rh_offset_set (devp_t * param, bool init, void * value, uint8_
 
 // Atmospheric pressure in Pascal ----------------------------------------------
 static int dp_bme_pressure_offset_get (devp_t * param, void * value);
-static int dp_bme_pressure_offset_set (devp_t * param, bool init, void * value, uint8_t size);
+static int dp_bme_pressure_offset_set (devp_t * param, bool init, const void * value, uint8_t size);
 
 static devp_t m_dp_bme_pressure_offset = {
 	.name = "bme_press_offset",
@@ -86,7 +86,7 @@ static int dp_bme_pressure_offset_get (devp_t * param, void * value)
 	return sizeof(int16_t);
 }
 
-static int dp_bme_pressure_offset_set (devp_t * param, bool init, void * value, uint8_t size)
+static int dp_bme_pressure_offset_set (devp_t * param, bool init, const void * value, uint8_t size)
 {
 	m_bme_pressure_offset = *((int16_t*)value);
 	return 0;

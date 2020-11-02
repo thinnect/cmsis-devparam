@@ -68,7 +68,7 @@ static devp_t * _devp_find(const char * name, uint8_t * idx)
 	return NULL;
 }
 
-int devp_set(const char * name, DeviceParameterTypes_t type, void * value, uint8_t size)
+int devp_set(const char * name, const DeviceParameterTypes_t type, const void * value, const uint8_t size)
 {
 	devp_t * pparam = _devp_find(name, NULL);
 	if (NULL == pparam)
@@ -102,7 +102,29 @@ int devp_set(const char * name, DeviceParameterTypes_t type, void * value, uint8
 	return 0;
 }
 
-int devp_get(const char * name, DeviceParameterTypes_t type, void * value, uint8_t size)
+int devp_store(const char * name, const DeviceParameterTypes_t type, const void * value, const uint8_t size)
+{
+	devp_t * pparam = _devp_find(name, NULL);
+	if (NULL == pparam)
+	{
+		return DEVP_UNKNOWN;
+	}
+	if (pparam->type != type)
+	{
+		return DEVP_ETYPE;
+	}
+
+	// Persist
+	if (pparam->persist)
+	{
+		int len = devp_storage_save(&m_storage, pparam->name, value, size, pparam->size);
+		return len;
+	}
+
+	return 0;
+}
+
+int devp_get(const char * name, const DeviceParameterTypes_t type, void * value, const uint8_t size)
 {
 	devp_t * pparam = _devp_find(name, NULL);
 	if (NULL == pparam)

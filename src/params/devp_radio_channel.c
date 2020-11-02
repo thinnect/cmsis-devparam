@@ -14,7 +14,7 @@ static void * m_changed_user = NULL;
 #ifndef DEVP_RADIO_CHANNEL_ONLY
 //------------------------------------------------------------------------------
 static int dp_radio_ch_default_get(devp_t * param, void * value);
-static int dp_radio_ch_default_set(devp_t * param, bool init, void * value, uint8_t size);
+static int dp_radio_ch_default_set(devp_t * param, bool init, const void * value, uint8_t size);
 static devp_t m_dp_radio_ch_default = {
 	.name = "radio_ch_default",
 	.type = DP_TYPE_UINT8,
@@ -36,7 +36,7 @@ static int dp_radio_ch_default_get(devp_t * param, void * value)
 	return sizeof(uint8_t);
 }
 
-static int dp_radio_ch_default_set(devp_t * param, bool init, void * value, uint8_t size)
+static int dp_radio_ch_default_set(devp_t * param, bool init, const void * value, uint8_t size)
 {
 	uint8_t ov = m_radio_ch_default;
 	m_radio_ch_default = *((uint8_t*)value);
@@ -82,7 +82,7 @@ uint8_t get_radio_channel()
 #if !defined(DEVP_RADIO_CHANNEL_REQUIRE_REBOOT) || defined(DEVP_RADIO_CHANNEL_PERSISTENT)
 //------------------------------------------------------------------------------
 static int dp_radio_channel_get(devp_t * param, void * value);
-static int dp_radio_channel_set(devp_t * param, bool init, void * value, uint8_t size);
+static int dp_radio_channel_set(devp_t * param, bool init, const void * value, uint8_t size);
 static devp_t m_dp_radio_channel = {
 	.name = "radio_channel",
 	.type = DP_TYPE_UINT8,
@@ -102,7 +102,7 @@ static int dp_radio_channel_get(devp_t * param, void * value)
 	return sizeof(uint8_t);
 }
 
-static int dp_radio_channel_set(devp_t * param, bool init, void * value, uint8_t size)
+static int dp_radio_channel_set(devp_t * param, bool init, const void * value, uint8_t size)
 {
 	uint8_t ov = m_radio_channel;
 	m_radio_channel = *((uint8_t*)value);

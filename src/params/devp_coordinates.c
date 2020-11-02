@@ -15,7 +15,7 @@ static int32_t m_elevation = 0;
 
 // geo_fix_type ----------------------------------------------------------------
 static int dp_geo_fix_type_get(devp_t * param, void * value);
-static int dp_geo_fix_type_set(devp_t * param, bool init, void * value, uint8_t size);
+static int dp_geo_fix_type_set(devp_t * param, bool init, const void * value, uint8_t size);
 
 static devp_t m_dp_geo_fix_type = {
 	.name = "geo_fix_type",
@@ -32,7 +32,7 @@ static int dp_geo_fix_type_get(devp_t * param, void * value)
 	return sizeof(char);
 }
 
-static int dp_geo_fix_type_set(devp_t * param, bool init, void * value, uint8_t size)
+static int dp_geo_fix_type_set(devp_t * param, bool init, const void * value, uint8_t size)
 {
 	m_geo_fix_type = *((char*)value);
 	return 0;
@@ -41,7 +41,7 @@ static int dp_geo_fix_type_set(devp_t * param, bool init, void * value, uint8_t 
 
 // geo_latitude ----------------------------------------------------------------
 static int dp_geo_latitude_get(devp_t * param, void * value);
-static int dp_geo_latitude_set(devp_t * param, bool init, void * value, uint8_t size);
+static int dp_geo_latitude_set(devp_t * param, bool init, const void * value, uint8_t size);
 
 static devp_t m_dp_geo_latitude = {
 	.name = "geo_latitude",
@@ -58,7 +58,7 @@ static int dp_geo_latitude_get(devp_t * param, void * value)
 	return sizeof(int32_t);
 }
 
-static int dp_geo_latitude_set(devp_t * param, bool init, void * value, uint8_t size)
+static int dp_geo_latitude_set(devp_t * param, bool init, const void * value, uint8_t size)
 {
 	m_geo_latitude = *((int32_t*)value);
 	return 0;
@@ -67,7 +67,7 @@ static int dp_geo_latitude_set(devp_t * param, bool init, void * value, uint8_t 
 
 // geo_longitude ---------------------------------------------------------------
 static int dp_geo_longitude_get(devp_t * param, void * value);
-static int dp_geo_longitude_set(devp_t * param, bool init, void * value, uint8_t size);
+static int dp_geo_longitude_set(devp_t * param, bool init, const void * value, uint8_t size);
 
 static devp_t m_dp_geo_longitude = {
 	.name = "geo_longitude",
@@ -84,7 +84,7 @@ static int dp_geo_longitude_get(devp_t * param, void * value)
 	return sizeof(int32_t);
 }
 
-static int dp_geo_longitude_set(devp_t * param, bool init, void * value, uint8_t size)
+static int dp_geo_longitude_set(devp_t * param, bool init, const void * value, uint8_t size)
 {
 	m_geo_longitude = *((int32_t*)value);
 	return 0;
@@ -93,7 +93,7 @@ static int dp_geo_longitude_set(devp_t * param, bool init, void * value, uint8_t
 
 // elevation -------------------------------------------------------------------
 static int dp_elevation_get(devp_t * param, void * value);
-static int dp_elevation_set(devp_t * param, bool init, void * value, uint8_t size);
+static int dp_elevation_set(devp_t * param, bool init, const void * value, uint8_t size);
 
 static devp_t m_dp_elevation = {
 	.name = "elevation",
@@ -110,7 +110,7 @@ static int dp_elevation_get(devp_t * param, void * value)
 	return sizeof(int32_t);
 }
 
-static int dp_elevation_set(devp_t * param, bool init, void * value, uint8_t size)
+static int dp_elevation_set(devp_t * param, bool init, const void * value, uint8_t size)
 {
 	m_elevation = *((int32_t*)value);
 	return 0;

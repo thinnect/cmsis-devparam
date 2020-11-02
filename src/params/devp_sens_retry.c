@@ -7,7 +7,7 @@
 #include "devp_sens_retry.h"
 
 static int dp_sens_retry_get(devp_t * param, void * value);
-static int dp_sens_retry_set(devp_t * param, bool init, void * value, uint8_t size);
+static int dp_sens_retry_set(devp_t * param, bool init, const void * value, uint8_t size);
 
 static devp_t m_dp_sens_retry = {
 	.name = "sens_retry",
@@ -26,7 +26,7 @@ static int dp_sens_retry_get(devp_t * param, void * value)
 	return sizeof(uint16_t);
 }
 
-static int dp_sens_retry_set(devp_t * param, bool init, void * value, uint8_t size)
+static int dp_sens_retry_set(devp_t * param, bool init, const void * value, uint8_t size)
 {
 	m_sens_retry = *((uint16_t*)value);
 	return 0;

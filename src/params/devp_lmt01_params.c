@@ -12,7 +12,7 @@ static int16_t m_lmt01_offset; // degC * 10
 
 // Temperature in degrees * 10 -------------------------------------------------
 static int dp_lmt01_offset_get (devp_t * param, void * value);
-static int dp_lmt01_offset_set (devp_t * param, bool init, void * value, uint8_t size);
+static int dp_lmt01_offset_set (devp_t * param, bool init, const void * value, uint8_t size);
 
 static devp_t m_dp_lmt01_offset = {
 	.name = "lmt01_offset",
@@ -29,7 +29,7 @@ static int dp_lmt01_offset_get (devp_t * param, void * value)
 	return sizeof(int16_t);
 }
 
-static int dp_lmt01_offset_set (devp_t * param, bool init, void * value, uint8_t size)
+static int dp_lmt01_offset_set (devp_t * param, bool init, const void * value, uint8_t size)
 {
 	m_lmt01_offset = *((int16_t*)value);
 	return 0;

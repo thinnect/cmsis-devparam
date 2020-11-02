@@ -9,7 +9,7 @@
 #include "cmsis_os2_ext.h"
 
 static int dp_reboot_get(devp_t * param, void * value);
-static int dp_reboot_set(devp_t * param, bool init, void * value, uint8_t size);
+static int dp_reboot_set(devp_t * param, bool init, const void * value, uint8_t size);
 
 static devp_t m_dp_reboot = {
 	.name = "reboot",
@@ -43,7 +43,7 @@ static int dp_reboot_get(devp_t * param, void * value)
 	return sizeof(uint32_t);
 }
 
-static int dp_reboot_set(devp_t * param, bool init, void * value, uint8_t size)
+static int dp_reboot_set(devp_t * param, bool init, const void * value, uint8_t size)
 {
 	m_reboot_base = osCounterGetMilli();
 	m_reboot_time = *((uint32_t*)value);

@@ -9,7 +9,7 @@
 #include "endianness.h" // manual endianness conversions because using RAW type
 
 static int dp_pan_id_get(devp_t * param, void * value);
-static int dp_pan_id_set(devp_t * param, bool init, void * value, uint8_t size);
+static int dp_pan_id_set(devp_t * param, bool init, const void * value, uint8_t size);
 
 static devp_t m_dp_pan_id = {
 	.name = "pan_id",
@@ -28,7 +28,7 @@ static int dp_pan_id_get(devp_t * param, void * value)
 	return sizeof(uint16_t);
 }
 
-static int dp_pan_id_set(devp_t * param, bool init, void * value, uint8_t size)
+static int dp_pan_id_set(devp_t * param, bool init, const void * value, uint8_t size)
 {
 	m_pan_id = ntoh16(*((uint16_t*)value));
 	return 0;

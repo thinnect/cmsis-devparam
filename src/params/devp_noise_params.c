@@ -7,7 +7,7 @@
 #include "devp_noise_params.h"
 
 static int dp_noise_params_get_offset (devp_t * param, void * value);
-static int dp_noise_params_set_offset (devp_t * param, bool init, void * value, uint8_t size);
+static int dp_noise_params_set_offset (devp_t * param, bool init, const void * value, uint8_t size);
 
 static devp_t m_dp_noise_offset = {
 	.name = "noise_offset",
@@ -26,7 +26,7 @@ int dp_noise_params_get_offset (devp_t * param, void * value)
 	return sizeof(uint8_t);
 }
 
-int dp_noise_params_set_offset (devp_t * param, bool init, void * value, uint8_t size)
+int dp_noise_params_set_offset (devp_t * param, bool init, const void * value, uint8_t size)
 {
 	m_noise_offset = *((uint8_t*)value);
 	return 0;

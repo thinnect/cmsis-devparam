@@ -9,6 +9,8 @@
 
 #include "devp.h"
 
+#include "node_lifetime.h"
+
 void devp_lifetime_init();
 
 #endif//DEVP_LIFETIME_H_
