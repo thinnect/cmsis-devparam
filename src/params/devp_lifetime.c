@@ -8,9 +8,14 @@
 
 #include "cmsis_os2_ext.h"
 
+static uint32_t m_lifetime_initial = 0;
+static uint32_t m_lifetime_boots = 1;
+static bool m_boots_stored = false;
+
 static int dp_lifetime_get (devp_t * param, void * value);
 static int dp_lifetime_set (devp_t * param, bool init, const void * value, uint8_t size);
 
+// -----------------------------------------------------------------------------
 static devp_t m_dp_lifetime = {
 	.name = "lifetime",
 	.type = DP_TYPE_UINT32,
@@ -19,8 +24,6 @@ static devp_t m_dp_lifetime = {
 	.getf = dp_lifetime_get,
 	.setf = dp_lifetime_set
 };
-
-static uint32_t m_lifetime_initial;
 
 static int dp_lifetime_get (devp_t * param, void * value)
 {
@@ -37,9 +40,9 @@ static int dp_lifetime_set (devp_t * param, bool init, const void * value, uint8
 	}
 	return DEVP_EREADONLY;
 }
-
 // -----------------------------------------------------------------------------
 
+// -----------------------------------------------------------------------------
 static int dp_boots_get (devp_t * param, void * value);
 static int dp_boots_set (devp_t * param, bool init, const void * value, uint8_t size);
 
@@ -51,9 +54,6 @@ static devp_t m_dp_boots = {
 	.getf = dp_boots_get,
 	.setf = dp_boots_set
 };
-
-static uint32_t m_lifetime_boots;
-static bool m_boots_stored;
 
 static int dp_boots_get (devp_t * param, void * value)
 {
@@ -70,14 +70,12 @@ static int dp_boots_set (devp_t * param, bool init, const void * value, uint8_t 
 	}
 	return DEVP_EREADONLY;
 }
-
 // -----------------------------------------------------------------------------
 
 void devp_lifetime_init ()
 {
 	devp_register(&m_dp_lifetime);
 	devp_register(&m_dp_boots);
-	m_boots_stored = false;
 }
 
 void node_lifetime_sync ()
