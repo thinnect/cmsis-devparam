@@ -9,6 +9,7 @@
 
 #include "stddef.h"
 
+#include "platform_io.h"
 #include "retargeti2cconfig.h"
 #include "platform_i2c.h"
 
