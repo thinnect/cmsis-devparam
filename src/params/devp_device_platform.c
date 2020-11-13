@@ -27,7 +27,7 @@ static devp_t m_dp_device_platform =
 
 int dp_device_platform_get (devp_t * param, void * value)
 {
-    uint8_t platform_name[PLATFORM_NAME_SIZE];
+    char platform_name[PLATFORM_NAME_SIZE];
     sigGetPlatformName(platform_name, PLATFORM_NAME_SIZE);
 
     strcpy((char*)value, platform_name);
