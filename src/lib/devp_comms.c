@@ -471,7 +471,7 @@ static void sleep_timer_fired_cb()
 	osThreadFlagsSet(m_devp_thread_id, DEVP_FLAGS_SLEEP);
 }
 
-void devp_comms_init()
+bool devp_comms_init()
 {
 	m_mutex = osMutexNew(NULL);
 	m_sleep_timer = osTimerNew(sleep_timer_fired_cb, osTimerOnce, NULL, NULL);
@@ -484,8 +484,14 @@ void devp_comms_init()
 	}
 
     // Create a thread
-    const osThreadAttr_t thread_attr = { .name = "devp" };
+    const osThreadAttr_t thread_attr = { .name = "devp", .stack_size = 1536 };
     m_devp_thread_id = osThreadNew(devp_comms_loop, NULL, &thread_attr);
+
+    if (NULL == m_devp_thread_id)
+    {
+    	return false;
+    }
+    return true;
 }
 
 int devp_add_iface(comms_layer_t * comms, comms_sleep_controller_t * ctrl, bool heartbeat)

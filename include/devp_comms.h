@@ -15,7 +15,11 @@
 
 #include "mist_comm.h"
 
-void devp_comms_init();
+/**
+ * Initialize DeviceParameters communications.
+ * @return true If successfully initialized and task created.
+ */
+bool devp_comms_init();
 
 int devp_add_iface(comms_layer_t * comms, comms_sleep_controller_t * ctrl, bool heartbeat);
 int devp_remove_iface(comms_layer_t * comms);
