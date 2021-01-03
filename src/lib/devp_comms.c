@@ -484,7 +484,7 @@ bool devp_comms_init()
 	}
 
     // Create a thread
-    const osThreadAttr_t thread_attr = { .name = "devp", .stack_size = 1536 };
+    const osThreadAttr_t thread_attr = { .name = "devp", .stack_size = 1800 };
     m_devp_thread_id = osThreadNew(devp_comms_loop, NULL, &thread_attr);
 
     if (NULL == m_devp_thread_id)
