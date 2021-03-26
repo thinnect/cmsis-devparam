@@ -66,9 +66,13 @@ static uint8_t m_mode = 0;
 
 static int dp_mode_get (devp_t * param, void * value)
 {
-	int len = strlen(m_device_mode_strings[m_mode]);
-	memcpy(value, m_device_mode_strings[m_mode], len);
-	return len;
+	if (m_mode < DEVICE_MODE_TOTAL_COUNT)
+	{
+		int len = strlen(m_device_mode_strings[m_mode]);
+		memcpy(value, m_device_mode_strings[m_mode], len);
+		return len;
+	}
+	return DEVP_EVALUE;
 }
 
 static int dp_mode_set (devp_t * param, bool init, const void * value, uint8_t size)
@@ -118,6 +122,11 @@ void devp_device_mode_init (devp_changed_cb_f callback, void * user)
 uint8_t get_device_mode ()
 {
 	return m_mode;
+}
+
+void set_device_mode (uint8_t mode)
+{
+	m_mode = mode;
 }
 
 const char * get_device_mode_string ()

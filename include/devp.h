@@ -21,7 +21,8 @@ typedef enum DevpErrors {
 	DEVP_EOFF      = -4,
 	DEVP_EBUSY     = -5,
 	DEVP_ETYPE     = -6,
-	DEVP_EINVAL    = -7
+	DEVP_EINVAL    = -7,
+	DEVP_EVALUE    = -8
 } devp_errors_t;
 
 typedef struct devp devp_t;
