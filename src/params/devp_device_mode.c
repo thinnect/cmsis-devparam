@@ -126,7 +126,10 @@ uint8_t get_device_mode ()
 
 void set_device_mode (uint8_t mode)
 {
-	m_mode = mode;
+	if (mode < DEVICE_MODE_TOTAL_COUNT)
+	{
+		m_mode = mode;
+	}
 }
 
 const char * get_device_mode_string ()
