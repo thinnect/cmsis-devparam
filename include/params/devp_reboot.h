@@ -1,5 +1,5 @@
 /**
- * Reboot device by setting the reboot parameter throug DeviceParamaters.
+ * Reboot device by setting the reboot parameter through DeviceParameters.
  *
  * Copyright Thinnect Inc. 2020
  * @license MIT
