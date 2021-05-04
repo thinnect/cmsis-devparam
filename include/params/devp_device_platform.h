@@ -1,5 +1,5 @@
 /**
- * Device platform type-version through DeviceParamaters.
+ * Device platform info through DeviceParamaters.
  *
  * Copyright Thinnect Inc. 2020
  * @license MIT
