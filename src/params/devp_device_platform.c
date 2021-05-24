@@ -12,7 +12,7 @@
 
 #include "DeviceSignature.h"
 
-#define PLATFORM_NAME_SIZE 16
+#define PLATFORM_NAME_SIZE 17
 #define PLATFORM_VERSION_SIZE 12
 #define PLATFORM_UUID_SIZE 16
 
@@ -52,12 +52,8 @@ static devp_t m_dp_device_platform_uuid =
 
 int dp_device_platform_name_get (devp_t * param, void * value)
 {
-    char platform_name[PLATFORM_NAME_SIZE];
-    sigGetPlatformName(platform_name, PLATFORM_NAME_SIZE);
-
-    strcpy((char*)value, platform_name);
-
-    return PLATFORM_NAME_SIZE;
+    sigGetPlatformName(value, PLATFORM_NAME_SIZE);
+    return strlen(value);
 }
 
 int dp_device_platform_version_get (devp_t * param, void * value)

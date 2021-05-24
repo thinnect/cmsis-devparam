@@ -12,7 +12,7 @@
 
 #include "DeviceSignature.h"
 
-#define BOARD_NAME_SIZE 16
+#define BOARD_NAME_SIZE 17
 #define BOARD_VERSION_SIZE 12
 #define BOARD_UUID_SIZE 16
 
@@ -52,12 +52,8 @@ static devp_t m_dp_device_board_uuid =
 
 int dp_device_board_name_get (devp_t * param, void * value)
 {
-    char board_name[BOARD_NAME_SIZE];
-    sigGetBoardName(board_name, BOARD_NAME_SIZE);
-
-    strcpy((char*)value, board_name);
-
-    return BOARD_NAME_SIZE;
+    sigGetBoardName(value, BOARD_NAME_SIZE);
+    return strlen(value);
 }
 
 int dp_device_board_version_get (devp_t * param, void * value)
