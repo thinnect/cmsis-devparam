@@ -16,6 +16,9 @@
 #include "retargeti2c.h"
 #include "retargeti2cconfig.h"
 #include "platform_i2c.h"
+#ifdef TBCO2
+#include "tbco2_app.h"
+#endif // TBCO2
 
 #include "loglevels.h"
 #define __MODUUL__ "scd30s"
@@ -53,7 +56,7 @@ static int16_t scd30_get_forced_calibration(uint16_t * co2_ppm)
 
     return STATUS_OK;
 }
-
+#ifndef TBCO2
 static int16_t scd30_get_temperature_offset(uint16_t * temperature_offset)
 {
     uint16_t word;
@@ -69,6 +72,7 @@ static int16_t scd30_get_temperature_offset(uint16_t * temperature_offset)
 
     return STATUS_OK;
 }
+#endif //TBCO2
 
 static int16_t scd30_get_firmware_version(uint16_t * firmware_version)
 {
@@ -130,7 +134,7 @@ static bool scd_enable()
 	}
 	return false;
 }
-
+#ifndef TBCO2
 static bool scd_get(float * pco2, float * ptmp, float * phum)
 {
 	uint16_t scd30_data_ready = 0;
@@ -163,6 +167,7 @@ static bool scd_get(float * pco2, float * ptmp, float * phum)
 	}
 	return false;
 }
+#endif //TBCO2
 // -----------------------------------------------------------------------------
 
 // -----------------------------------------------------------------------------
@@ -180,13 +185,24 @@ static devp_t m_dp_scd_service_mode = {
 
 static int dp_scd_service_mode_get(devp_t * param, void * value)
 {
+#ifdef TBCO2
+	*((bool*)value) = tbco2_get_scd30_service_mode();
+	return sizeof(bool);
+#else
 	*((bool*)value) = m_scd_service_mode;
 	return sizeof(bool);
+#endif
 }
 
 static int dp_scd_service_mode_set(devp_t * param, bool init, const void * value, uint8_t size)
 {
+#ifdef TBCO2
+	//Disabling this functionality when using on TBCO2
+	return 0;
+#else
 	bool mode = *(bool*)value;
+#endif //TBCO2
+
 	if (mode != m_scd_service_mode)
 	{
 		if (mode)
@@ -249,6 +265,9 @@ static devp_t m_dp_scd_serial = {
 
 static int dp_scd_serial_get(devp_t * param, void * value)
 {
+#ifdef TBCO2
+	m_scd_service_mode = tbco2_get_scd30_service_mode();
+#endif
 	if(m_scd_service_mode)
 	{
 		if (0 == scd30_read_serial(value))
@@ -264,7 +283,6 @@ static int dp_scd_serial_get(devp_t * param, void * value)
 
 // -----------------------------------------------------------------------------
 static int dp_scd_firmware_get(devp_t * param, void * value);
-
 static devp_t m_dp_scd_firmware = {
 	.name = "scd_firmware",
 	.type = DP_TYPE_STRING,
@@ -276,6 +294,9 @@ static devp_t m_dp_scd_firmware = {
 
 static int dp_scd_firmware_get(devp_t * param, void * value)
 {
+#ifdef TBCO2
+	m_scd_service_mode = tbco2_get_scd30_service_mode();
+#endif
 	if(m_scd_service_mode)
 	{
 		uint16_t firmware;
@@ -307,11 +328,17 @@ static int dp_scd_co2_get(devp_t * param, void * value)
 	if (m_scd_service_mode)
 	{
 		float co2;
+#ifdef TBCO2
+		co2 = tbco2_get_scd30_co2();
+		*((uint16_t*)value) = co2;
+		return sizeof(uint16_t);
+#else
 		if(scd_get(&co2, NULL, NULL))
 		{
 			*((uint16_t*)value) = co2;
 			return sizeof(uint16_t);
 		}
+#endif //TBCO2
 		return 0;
 	}
 	return DEVP_EOFF;
@@ -335,11 +362,17 @@ static int dp_scd_temp_get(devp_t * param, void * value)
 	if (m_scd_service_mode)
 	{
 		float temp;
+#ifdef TBCO2
+		temp = tbco2_get_scd30_temperature();
+		*((int16_t*)value) = temp * 10;
+		return sizeof(int16_t);
+#else
 		if(scd_get(NULL, &temp, NULL))
 		{
 			*((int16_t*)value) = temp * 10;
 			return sizeof(int16_t);
 		}
+#endif //TBCO2
 		return 0;
 	}
 	return DEVP_EOFF;
@@ -363,12 +396,19 @@ static int dp_scd_hum_get(devp_t * param, void * value)
 	if (m_scd_service_mode)
 	{
 		float hum;
+#ifdef TBCO2
+		hum = tbco2_get_scd30_humidity();
+		*((uint16_t*)value) = hum * 10;
+		return sizeof(uint16_t);
+#else
+
 		if(scd_get(NULL, NULL, &hum))
 		{
 			*((uint16_t*)value) = hum * 10;
 			return sizeof(uint16_t);
 		}
 		return 0;
+#endif //TBCO2
 	}
 	return DEVP_EOFF;
 }
@@ -391,10 +431,17 @@ static int dp_scd_tempoffs_get(devp_t * param, void * value)
 {
 	if (m_scd_service_mode)
 	{
+#ifdef TBCO2
+		if(0 == tbco2_get_scd30_temperature_offset(value))
+		{
+			return sizeof(uint16_t);
+		}
+#else
 		if(0 == scd30_get_temperature_offset(value))
 		{
 			return sizeof(uint16_t);
 		}
+#endif //TBCO2
 		return DEVP_EINVAL;
 	}
 	return DEVP_EOFF;
