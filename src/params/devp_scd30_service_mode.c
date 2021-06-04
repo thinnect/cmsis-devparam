@@ -486,7 +486,7 @@ static int dp_scd_tempoffs_set(devp_t * param, bool init, const void * value, ui
 		if(m_scd_service_mode)
 		{
 			uint16_t temperature_offset = *((uint16_t*)value);
-			if(0 == tbco2_set_scd30_temperature_offset(&temperature_offset))
+			if(0 == tbco2_set_scd30_temperature_offset(temperature_offset))
 			{
 				return 0;
 			}
