@@ -246,7 +246,7 @@ static int setValue(const char * name, DeviceParameterTypes_t tp, void * value, 
 		case DP_TYPE_UINT64:
 		case DP_TYPE_INT64:
 		{
-			if (sizeof(uint32_t) == size)
+			if (sizeof(uint64_t) == size)
 			{
 				uint64_t v;
 				memcpy_swap(&v, value, sizeof(uint64_t));
