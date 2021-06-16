@@ -46,6 +46,19 @@ static comms_sleep_controller_t * mp_sleep_ctrl[DEVP_MAX_IFACES];
 static bool m_heartbeat[DEVP_MAX_IFACES];
 static comms_receiver_t m_rcvrs[DEVP_MAX_IFACES];
 
+
+static void memcpy_swap (void * dst, void * src, size_t length)
+{
+	#ifdef __LITTLE_ENDIAN__
+		for (int i = 0; i < length; i++)
+		{
+			((uint8_t*)dst)[i] = ((uint8_t*)src)[length - 1 - i];
+		}
+	#else
+		memcpy(dst, src, length);
+	#endif//__LITTLE_ENDIAN__
+}
+
 static void radio_status_changed(comms_layer_t* comms, comms_status_t status, void* user)
 {
     // Actual status change is checked by polling during startup, but the callback is mandatory
@@ -139,7 +152,7 @@ static comms_error_t sendValue(comms_layer_t * comms, const comms_address_t * de
 		df->seqnum = idx;
 		df->idlength = idlen;
 		df->valuelength = length;
-		memcpy(((uint8_t*)df)+sizeof(dp_parameter_t), fid, idlen);
+		memcpy((uint8_t*)df->id, fid, idlen);
 		if(length > 0)
 		{
 			void * pv = (void*)(((uint8_t*)(df->id)) + idlen); // Pointer to value location
@@ -147,40 +160,40 @@ static comms_error_t sendValue(comms_layer_t * comms, const comms_address_t * de
 			{
 				case DP_TYPE_UINT16:
 				case DP_TYPE_INT16:
-					*((uint16_t*)pv) = hton16(*((uint16_t*)value));
+					memcpy_swap(pv, value, sizeof(uint16_t));
 				break;
 
 				case DP_TYPE_UINT32:
 				case DP_TYPE_INT32:
-					*((uint32_t*)pv) = hton32(*((uint32_t*)value));
+					memcpy_swap(pv, value, sizeof(uint32_t));
 				break;
 
 				case DP_TYPE_UINT64:
 				case DP_TYPE_INT64:
-					*((uint64_t*)pv) = hton64(*((uint64_t*)value));
+					memcpy_swap(pv, value, sizeof(uint64_t));
 				break;
 
 				case DP_ARRAY_UINT16:
 				case DP_ARRAY_INT16:
-					for(uint8_t i=0;i<length/sizeof(uint16_t);i++)
+					for(int i=0;i<length/sizeof(uint16_t);i++)
 					{
-						*(((uint16_t*)pv)+i) = hton16(*(((uint16_t*)value)+i));
+						memcpy_swap(((uint16_t*)pv)+i, ((uint16_t*)value)+i, sizeof(uint16_t));
 					}
 				break;
 
 				case DP_ARRAY_UINT32:
 				case DP_ARRAY_INT32:
-					for(uint8_t i=0;i<length/sizeof(uint32_t);i++)
+					for(int i=0;i<length/sizeof(uint32_t);i++)
 					{
-						*(((uint32_t*)pv)+i) = hton32(*(((uint32_t*)value)+i));
+						memcpy_swap(((uint32_t*)pv)+i, ((uint32_t*)value)+i, sizeof(uint32_t));
 					}
 				break;
 
 				case DP_ARRAY_UINT64:
 				case DP_ARRAY_INT64:
-					for(uint8_t i=0;i<length/sizeof(uint64_t);i++)
+					for(int i=0;i<length/sizeof(uint64_t);i++)
 					{
-						*(((uint64_t*)pv)+i) = hton64(*(((uint64_t*)value)+i));
+						memcpy_swap(((uint64_t*)pv)+i, ((uint64_t*)value)+i, sizeof(uint64_t));
 					}
 				break;
 
@@ -207,57 +220,90 @@ static int setValue(const char * name, DeviceParameterTypes_t tp, void * value, 
 		case DP_TYPE_UINT16:
 		case DP_TYPE_INT16:
 		{
-			uint16_t v = ntoh16(*((uint16_t*)value));
-			return devp_set(name, tp, &v, size);
+			if (sizeof(uint16_t) == size)
+			{
+				uint16_t v;
+				memcpy_swap(&v, value, sizeof(uint16_t));
+				return devp_set(name, tp, &v, sizeof(uint16_t));
+			}
+			return DEVP_ESIZE;
 		}
 		break;
 
 		case DP_TYPE_UINT32:
 		case DP_TYPE_INT32:
 		{
-			uint32_t v = ntoh32(*((uint32_t*)value));
-			return devp_set(name, tp, &v, size);
+			if (sizeof(uint32_t) == size)
+			{
+				uint32_t v;
+				memcpy_swap(&v, value, sizeof(uint32_t));
+				return devp_set(name, tp, &v, sizeof(uint32_t));
+			}
+			return DEVP_ESIZE;
 		}
 		break;
 
 		case DP_TYPE_UINT64:
 		case DP_TYPE_INT64:
 		{
-			uint64_t v = ntoh64(*((uint64_t*)value));
-			return devp_set(name, tp, &v, size);
+			if (sizeof(uint32_t) == size)
+			{
+				uint64_t v;
+				memcpy_swap(&v, value, sizeof(uint64_t));
+				return devp_set(name, tp, &v, sizeof(uint64_t));
+			}
+			return DEVP_ESIZE;
 		}
 		break;
 
 		case DP_ARRAY_UINT16:
 		case DP_ARRAY_INT16:
 		{
-			for(uint8_t i=0;i<size/sizeof(uint16_t);i++)
+			if (0 == size % sizeof(uint16_t))
 			{
-				*(((uint16_t*)value)+i) = ntoh16(*(((uint16_t*)value)+i));
+				for(int i=0;i<size/sizeof(uint16_t);i++)
+				{
+					uint16_t v;
+					memcpy_swap(&v, ((uint16_t*)value)+i, sizeof(uint16_t));
+					memcpy(((uint16_t*)value)+i, &v, sizeof(uint16_t));
+				}
+				return devp_set(name, tp, value, size);
 			}
-			return devp_set(name, tp, value, size);
+			return DEVP_ESIZE;
 		}
 		break;
 
 		case DP_ARRAY_UINT32:
 		case DP_ARRAY_INT32:
 		{
-			for(uint8_t i=0;i<size/sizeof(uint32_t);i++)
+			if (0 == size % sizeof(uint32_t))
 			{
-				*(((uint32_t*)value)+i) = ntoh32(*(((uint32_t*)value)+i));
+				for(int i=0;i<size/sizeof(uint32_t);i++)
+				{
+					uint32_t v;
+					memcpy_swap(&v, ((uint32_t*)value)+i, sizeof(uint32_t));
+					memcpy(((uint32_t*)value)+i, &v, sizeof(uint32_t));
+				}
+				return devp_set(name, tp, value, size);
 			}
-			return devp_set(name, tp, value, size);
+			return DEVP_ESIZE;
 		}
 		break;
 
 		case DP_ARRAY_UINT64:
 		case DP_ARRAY_INT64:
 		{
-			for(uint8_t i=0;i<size/sizeof(uint64_t);i++)
+			if (0 == size % sizeof(uint64_t))
 			{
-				*(((uint64_t*)value)+i) = ntoh64(*(((uint64_t*)value)+i));
+				for(int i=0;i<size/sizeof(uint64_t);i++)
+				{
+					uint64_t v;
+					memcpy_swap(&v, ((uint64_t*)value)+i, sizeof(uint64_t));
+					memcpy(((uint64_t*)value)+i, &v, sizeof(uint64_t));
+				}
+				return devp_set(name, tp, value, size);
 			}
-			return devp_set(name, tp, value, size);
+			return DEVP_ESIZE;
 		}
 		break;
 
@@ -478,7 +524,7 @@ bool devp_comms_init()
 
 	m_busy = false;
 
-	for(uint8_t i=0;i<DEVP_MAX_IFACES;i++)
+	for(int i=0;i<DEVP_MAX_IFACES;i++)
 	{
 		mp_ifaces[i] = NULL;
 	}
@@ -498,7 +544,7 @@ int devp_add_iface(comms_layer_t * comms, comms_sleep_controller_t * ctrl, bool 
 {
 	int ret = -1;
 	while(osOK != osMutexAcquire(m_mutex, osWaitForever));
-	for(uint8_t i=0;i<DEVP_MAX_IFACES;i++)
+	for(int i=0;i<DEVP_MAX_IFACES;i++)
 	{
 		if(mp_ifaces[i] == comms)
 		{
@@ -529,7 +575,7 @@ int devp_remove_iface(comms_layer_t * comms)
 {
 	int ret = -1;
 	while(osOK != osMutexAcquire(m_mutex, osWaitForever));
-	for(uint8_t i=0;i<DEVP_MAX_IFACES;i++)
+	for(int i=0;i<DEVP_MAX_IFACES;i++)
 	{
 		if(mp_ifaces[i] == comms)
 		{
