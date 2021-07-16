@@ -109,7 +109,7 @@ int dp_ltc_solar_current_get (devp_t * param, void * value)
 
         if (0.0 != ltc4095_data.battery_current_mA)
         {
-            *((int16_t*)value) = (int16_t)(battery_current_mA);
+            *((int16_t*)value) = (int16_t)(ltc4095_data.battery_current_mA);
         }
 
         platform_i2c_release(RETARGET_I2C_DEV);
