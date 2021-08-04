@@ -13,7 +13,7 @@
 #include "retargeti2cconfig.h"
 #include "platform_i2c.h"
 
-#include "ltc4095_charger.h"
+#include "ltc4015_charger.h"
 
 // -----------------------------------------------------------------------------
 static int dp_ltc_battery_voltage_get (devp_t * param, void * value);
@@ -34,12 +34,12 @@ int dp_ltc_battery_voltage_get (devp_t * param, void * value)
 
     if(true == platform_i2c_request(RETARGET_I2C_DEV, 1000U))
     {
-        ltc4095_data_t ltc4095_data;
-        ltc4095_charger_read_data(&ltc4095_data);
+        ltc4015_data_t ltc4015_data;
+        ltc4015_charger_read_data(&ltc4015_data);
 
-        if (0.0 < ltc4095_data.battery_voltage_V)
+        if (0.0 < ltc4015_data.battery_voltage_V)
         {
-            *((uint16_t*)value) = (uint16_t)(ltc4095_data.battery_voltage_V * 1000.0);
+            *((uint16_t*)value) = (uint16_t)(ltc4015_data.battery_voltage_V * 1000.0);
         }
 
         platform_i2c_release(RETARGET_I2C_DEV);
@@ -69,12 +69,12 @@ int dp_ltc_solar_voltage_get (devp_t * param, void * value)
 
     if(true == platform_i2c_request(RETARGET_I2C_DEV, 1000U))
     {
-        ltc4095_data_t ltc4095_data;
-        ltc4095_charger_read_data(&ltc4095_data);
+        ltc4015_data_t ltc4015_data;
+        ltc4015_charger_read_data(&ltc4015_data);
 
-        if (0.0 < ltc4095_data.input_voltage_V)
+        if (0.0 < ltc4015_data.input_voltage_V)
         {
-            *((uint16_t*)value) = (uint16_t)(ltc4095_data.input_voltage_V * 1000.0);
+            *((uint16_t*)value) = (uint16_t)(ltc4015_data.input_voltage_V * 1000.0);
         }
 
         platform_i2c_release(RETARGET_I2C_DEV);
@@ -104,12 +104,12 @@ int dp_ltc_solar_current_get (devp_t * param, void * value)
 
     if(true == platform_i2c_request(RETARGET_I2C_DEV, 1000U))
     {
-        ltc4095_data_t ltc4095_data;
-        ltc4095_charger_read_data(&ltc4095_data);
+        ltc4015_data_t ltc4015_data;
+        ltc4015_charger_read_data(&ltc4015_data);
 
-        if (0.0 != ltc4095_data.battery_current_mA)
+        if (0.0 != ltc4015_data.battery_current_mA)
         {
-            *((int16_t*)value) = (int16_t)(ltc4095_data.battery_current_mA);
+            *((int16_t*)value) = (int16_t)(ltc4015_data.battery_current_mA);
         }
 
         platform_i2c_release(RETARGET_I2C_DEV);
