@@ -9,8 +9,12 @@
 
 #include <string.h>
 #include "sensors.h"
+#include "retargeti2c.h"
+#include "retargeti2cconfig.h"
+#include "platform_i2c.h"
 #include "cmsis_os2_ext.h"
 #include "sensirion_common.h"
+#include "sensirion_i2c_hal.h"
 #include "scd4x_i2c.h"
 #ifdef TBCO2
 #include "tbco2_app.h"
@@ -22,9 +26,9 @@
 #include "log.h"
 
 #ifdef SCD4X_ADDRESS
-static const uint8_t SCD4X_I2C_ADDRESS = SCD4X_ADDRESS;
+#define SCD4X_I2C_ADDRESS SCD4X_ADDRESS;
 #else
-static const uint8_t SCD4X_I2C_ADDRESS = 0x62;
+#define SCD4X_I2C_ADDRESS 0x62;
 #endif
 
 #define SCD4X_CMD_SET_FORCED_RECALIBRATION 0x362F
@@ -110,6 +114,7 @@ static bool scd_get(int32_t * pco2, uint16_t * ptmp, int32_t * phum)
 static int16_t scd4x_get_forced_calibration(uint16_t * co2_ppm)
 {
 	uint16_t word;
+    uint8_t SCD4X_I2C_ADDRESS_TEMP = SCD4X_I2C_ADDRESS;
     int16_t ret = sensirion_i2c_read_cmd(SCD4X_I2C_ADDRESS,
                                  SCD4X_CMD_SET_FORCED_RECALIBRATION, &word,
                                  SENSIRION_NUM_WORDS(word));
@@ -227,7 +232,14 @@ static int dp_scd4x_serial_get(devp_t * param, void * value)
     {
         uint64_t temp = 0;
         uint16_t error = tbco2_get_scd4x_serial(&temp);
-        *((uint64_t*)value) = temp;
+        if(NO_ERROR == error)
+        {
+            *((uint64_t*)value) = temp;
+        }
+        else
+        {
+            return error;
+        }
     }
 #else
 	if(m_scd_service_mode)
@@ -440,7 +452,6 @@ static int dp_scd4x_frc_get(devp_t * param, void * value)
 {
 	if (m_scd_service_mode)
 	{
-		int16_t result = NO_ERROR;
 #ifdef TBCO2
         if(NO_ERROR == tbco2_get_scd4x_forced_calibration(value))
 #else
@@ -539,7 +550,7 @@ static int dp_scd4x_asc_set(devp_t * param, bool init, const void * value, uint8
 }
 // -----------------------------------------------------------------------------
 
-void devp_scd30_service_mode_init()
+void devp_scd4x_service_mode_init()
 {
 	devp_register(&m_dp_scd4x_service_mode);
 	devp_register(&m_dp_scd4x_service_time);
