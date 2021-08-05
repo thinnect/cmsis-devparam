@@ -178,22 +178,22 @@ static bool scd_get(float * pco2, float * ptmp, float * phum)
 // -----------------------------------------------------------------------------
 
 // -----------------------------------------------------------------------------
-static int dp_scd_service_mode_get(devp_t * param, void * value);
-static int dp_scd_service_mode_set(devp_t * param, bool init, const void * value, uint8_t size);
+static int dp_scd30_service_mode_get(devp_t * param, void * value);
+static int dp_scd30_service_mode_set(devp_t * param, bool init, const void * value, uint8_t size);
 
 static devp_t m_dp_scd_service_mode = {
-	.name = "scd_service_mode",
+	.name = "scd30_service_mode",
 	.type = DP_TYPE_BOOL,
 	.size = sizeof(bool),
 	.persist = false,
-	.getf = dp_scd_service_mode_get,
-	.setf = dp_scd_service_mode_set
+	.getf = dp_scd30_service_mode_get,
+	.setf = dp_scd30_service_mode_set
 };
 
-static int dp_scd_service_mode_get(devp_t * param, void * value)
+static int dp_scd30_service_mode_get(devp_t * param, void * value)
 {
 #ifdef TBCO2
-	*((bool*)value) = tbco2_get_scd30_service_mode();
+	*((bool*)value) = tbco2_get_scd_service_mode();
 	return sizeof(bool);
 #else
 	*((bool*)value) = m_scd_service_mode;
@@ -201,7 +201,7 @@ static int dp_scd_service_mode_get(devp_t * param, void * value)
 #endif
 }
 
-static int dp_scd_service_mode_set(devp_t * param, bool init, const void * value, uint8_t size)
+static int dp_scd30_service_mode_set(devp_t * param, bool init, const void * value, uint8_t size)
 {
 	bool mode;
 #ifdef TBCO2
@@ -274,7 +274,7 @@ static devp_t m_dp_scd_serial = {
 static int dp_scd_serial_get(devp_t * param, void * value)
 {
 #ifdef TBCO2
-	m_scd_service_mode = tbco2_get_scd30_service_mode();
+	m_scd_service_mode = tbco2_get_scd_service_mode();
 	int len = tbco2_get_scd30_serial(value);
 	if(len)
 	{
@@ -295,7 +295,7 @@ static int dp_scd_serial_get(devp_t * param, void * value)
 		((char*)value)[0] = '?';
 		return 1;
 	}
-#endif
+#endif //TBCO2
 	return DEVP_EOFF;
 }
 // -----------------------------------------------------------------------------
@@ -314,7 +314,7 @@ static devp_t m_dp_scd_firmware = {
 static int dp_scd_firmware_get(devp_t * param, void * value)
 {
 #ifdef TBCO2
-	m_scd_service_mode = tbco2_get_scd30_service_mode();
+	m_scd_service_mode = tbco2_get_scd_service_mode();
 	if(m_scd_service_mode)
 	{
 		uint16_t firmware;
@@ -360,7 +360,7 @@ static int dp_scd_co2_get(devp_t * param, void * value)
 	{
 		float co2;
 #ifdef TBCO2
-		co2 = tbco2_get_scd30_co2();
+		co2 = tbco2_get_scd_co2();
 		*((uint16_t*)value) = co2;
 		return sizeof(uint16_t);
 #else
@@ -394,7 +394,7 @@ static int dp_scd_temp_get(devp_t * param, void * value)
 	{
 		float temp;
 #ifdef TBCO2
-		temp = tbco2_get_scd30_temperature();
+		temp = tbco2_get_scd_temperature();
 		*((int16_t*)value) = temp * 10;
 		return sizeof(int16_t);
 #else
@@ -428,7 +428,7 @@ static int dp_scd_hum_get(devp_t * param, void * value)
 	{
 		float hum;
 #ifdef TBCO2
-		hum = tbco2_get_scd30_humidity();
+		hum = tbco2_get_scd_humidity();
 		*((uint16_t*)value) = hum * 10;
 		return sizeof(uint16_t);
 #else
