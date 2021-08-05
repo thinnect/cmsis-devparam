@@ -21,6 +21,14 @@
 #define __LOG_LEVEL__ (LOG_LEVEL_devp_scd4x_service_mode & BASE_LOG_LEVEL)
 #include "log.h"
 
+#ifdef SCD4X_ADDRESS
+static const uint8_t SCD4X_I2C_ADDRESS = SCD4X_ADDRESS;
+#else
+static const uint8_t SCD4X_I2C_ADDRESS = 0x62;
+#endif
+
+#define SCD4X_CMD_SET_FORCED_RECALIBRATION 0x362F
+
 static bool m_scd_service_mode = false;
 static uint32_t m_scd_service_mode_start_s;
 
@@ -98,6 +106,23 @@ static bool scd_get(int32_t * pco2, uint16_t * ptmp, int32_t * phum)
 	}
 
 }
+
+static int16_t scd4x_get_forced_calibration(uint16_t * co2_ppm)
+{
+	uint16_t word;
+    int16_t ret = sensirion_i2c_read_cmd(SCD4X_I2C_ADDRESS,
+                                 SCD4X_CMD_SET_FORCED_RECALIBRATION, &word,
+                                 SENSIRION_NUM_WORDS(word));
+    if (ret != NO_ERROR)
+    {
+        return ret;
+    }
+
+    *co2_ppm = word;
+
+    return NO_ERROR;
+}
+
 #endif //TBCO2
 // -----------------------------------------------------------------------------
 
@@ -334,6 +359,186 @@ static int dp_scd4x_hum_get(devp_t * param, void * value)
 }
 // -----------------------------------------------------------------------------
 
+// -----------------------------------------------------------------------------
+static int dp_scd4x_tempoffs_get(devp_t * param, void * value);
+static int dp_scd4x_tempoffs_set(devp_t * param, bool init, const void * value, uint8_t size);
+
+static devp_t m_dp_scd4x_tempoffs = {
+	.name = "scd4x_tempoffs",
+	.type = DP_TYPE_INT32,
+	.size = sizeof(int32_t),
+	.persist = false,
+	.getf = dp_scd4x_tempoffs_get,
+	.setf = dp_scd4x_tempoffs_set
+};
+
+static int dp_scd4x_tempoffs_get(devp_t * param, void * value)
+{
+	if (m_scd_service_mode)
+	{
+#ifdef TBCO2
+		if(0 == tbco2_get_scd4x_temperature_offset(value))
+		{
+			return sizeof(int32_t);
+		}
+#else
+		if(0 == scd4x_get_temperature_offset(value))
+		{
+			return sizeof(int32_t);
+		}
+#endif //TBCO2
+		return DEVP_EINVAL;
+	}
+	return DEVP_EOFF;
+}
+
+static int dp_scd4x_tempoffs_set(devp_t * param, bool init, const void * value, uint8_t size)
+{
+	if (sizeof(int32_t) == size)
+	{
+#ifdef TBCO2
+		if(m_scd_service_mode)
+		{
+			int32_t temperature_offset = *((int32_t*)value);
+			if(0 == tbco2_set_scd4x_temperature_offset(temperature_offset))
+			{
+				return 0;
+			}
+			return DEVP_EINVAL;
+		}
+#else
+		if (m_scd_service_mode)
+		{
+			int32_t temperature_offset = *((int32_t*)value);
+			if(0 == scd4x_set_temperature_offset(temperature_offset))
+			{
+				return 0;
+			}
+			return DEVP_EINVAL;
+		}
+#endif
+		return DEVP_EOFF;
+	}
+	return DEVP_ESIZE;
+}
+// -----------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------
+static int dp_scd4x_frc_get(devp_t * param, void * value);
+static int dp_scd4x_frc_set(devp_t * param, bool init, const void * value, uint8_t size);
+
+static devp_t m_dp_scd4x_frc = {
+	.name = "scd4x_co2_frc",
+	.type = DP_TYPE_UINT16,
+	.size = sizeof(uint16_t),
+	.persist = false,
+	.getf = dp_scd4x_frc_get,
+	.setf = dp_scd4x_frc_set
+};
+
+static int dp_scd4x_frc_get(devp_t * param, void * value)
+{
+	if (m_scd_service_mode)
+	{
+		int16_t result = NO_ERROR;
+#ifdef TBCO2
+        if(NO_ERROR == tbco2_get_scd4x_forced_calibration(value))
+#else
+        if(NO_ERROR == scd4x_get_forced_calibration(value))
+#endif //TBCO2
+		{
+            return sizeof(uint16_t);
+		}
+		return DEVP_EINVAL;
+	}
+	return DEVP_EOFF;
+
+}
+
+static int dp_scd4x_frc_set(devp_t * param, bool init, const void * value, uint8_t size)
+{
+	if (sizeof(uint16_t) == size)
+	{
+		if (m_scd_service_mode)
+		{
+			uint16_t frc = *((uint16_t*)value);
+            uint16_t result = NO_ERROR;
+#ifdef TBCO2
+			if (NO_ERROR == tbco2_set_scd4x_forced_calibration(frc, &result))
+#else
+            if(NO_ERROR == scd4x_perform_forced_recalibration(frc, &result))
+#endif //TBCO2
+			{
+				if (0xFFFF == result)
+                {
+                    return DEVP_EINVAL;
+                }
+                return NO_ERROR;
+			}
+			return DEVP_EINVAL;
+		}
+		return DEVP_EOFF;
+	}
+	return DEVP_ESIZE;
+
+}
+// -----------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------
+static int dp_scd4x_asc_get(devp_t * param, void * value);
+static int dp_scd4x_asc_set(devp_t * param, bool init, const void * value, uint8_t size);
+
+static devp_t m_dp_scd4x_asc = {
+	.name = "scd4x_co2_asc",
+	.type = DP_TYPE_UINT16,
+	.size = sizeof(uint16_t),
+	.persist = false,
+	.getf = dp_scd4x_asc_get,
+	.setf = dp_scd4x_asc_set
+};
+
+static int dp_scd4x_asc_get(devp_t * param, void * value)
+{
+	if (m_scd_service_mode)
+	{
+		uint16_t asc;
+#ifdef TBCO2
+        if(NO_ERROR == tbco2_get_scd4x_automatic_self_calibration(&asc))
+#else
+        if(NO_ERROR == scd4x_get_automatic_self_calibration(&asc))
+#endif //TBCO2
+		{
+			*((uint16_t*)value) = asc;
+		}
+
+		return sizeof(uint16_t);
+	}
+	return DEVP_EOFF;
+}
+
+static int dp_scd4x_asc_set(devp_t * param, bool init, const void * value, uint8_t size)
+{
+	if (sizeof(uint16_t) == size)
+	{
+		if (m_scd_service_mode)
+		{
+			uint16_t asc = *((uint16_t*)value);
+#ifdef TBCO2
+            if(NO_ERROR == tbco2_set_scd4x_automatic_self_calibration(asc))
+#else
+			if(NO_ERROR == scd4x_set_automatic_self_calibration(asc))
+#endif //TBCO2
+			{
+				return NO_ERROR;
+			}
+			return DEVP_EINVAL;
+		}
+		return DEVP_EOFF;
+	}
+	return DEVP_ESIZE;
+}
+// -----------------------------------------------------------------------------
+
 void devp_scd30_service_mode_init()
 {
 	devp_register(&m_dp_scd4x_service_mode);
@@ -342,7 +547,7 @@ void devp_scd30_service_mode_init()
 	devp_register(&m_dp_scd4x_temp);
 	devp_register(&m_dp_scd4x_hum);
 	devp_register(&m_dp_scd4x_co2);
-	devp_register(&m_dp_scd_tempoffs);
-	devp_register(&m_dp_scd_frc);
-	devp_register(&m_dp_scd_asc);
+	devp_register(&m_dp_scd4x_tempoffs);
+	devp_register(&m_dp_scd4x_frc);
+	devp_register(&m_dp_scd4x_asc);
 }
