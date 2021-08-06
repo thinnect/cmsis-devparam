@@ -40,7 +40,7 @@ static uint32_t m_scd_service_mode_start_s;
 // Functions useful when not using with TbCO2 application ----------------------
 static bool scd_disable()
 {
-	// Disable power to SCD30
+
 	ext_sensor_power_off();
 
 	RETARGET_I2CDeinit();
@@ -57,11 +57,9 @@ static bool scd_enable()
 		uint16_t error = 0;
         RETARGET_I2CInit();
 
-		// Enable power to SCD30 and wait for it to start
 		ext_sensor_power_on();
 
         osDelay(3000);
-	    sensirion_i2c_hal_init();
 
 		// Clean up potential SCD40 states
 		scd4x_wake_up();
@@ -136,7 +134,7 @@ static int dp_scd4x_service_mode_get(devp_t * param, void * value);
 static int dp_scd4x_service_mode_set(devp_t * param, bool init, const void * value, uint8_t size);
 
 static devp_t m_dp_scd4x_service_mode = {
-	.name = "scd30_service_mode",
+	.name = "scd4x_service_mode",
 	.type = DP_TYPE_BOOL,
 	.size = sizeof(bool),
 	.persist = false,
@@ -235,6 +233,7 @@ static int dp_scd4x_serial_get(devp_t * param, void * value)
         if(NO_ERROR == error)
         {
             *((uint64_t*)value) = temp;
+            return sizeof(uint64_t);
         }
         else
         {
@@ -389,10 +388,16 @@ static int dp_scd4x_tempoffs_get(devp_t * param, void * value)
 	if (m_scd_service_mode)
 	{
 #ifdef TBCO2
-		if(0 == tbco2_get_scd4x_temperature_offset(value))
+		int16_t error = 0;
+        error = tbco2_get_scd4x_temperature_offset(value);
+        if(NO_ERROR == error)
 		{
 			return sizeof(int32_t);
 		}
+        else
+        {
+            warn1("tbco2_scd4x_get temp_offset_error: %d", error);
+        }
 #else
 		if(0 == scd4x_get_temperature_offset(value))
 		{
@@ -452,14 +457,20 @@ static int dp_scd4x_frc_get(devp_t * param, void * value)
 {
 	if (m_scd_service_mode)
 	{
+        int16_t error = 0;
 #ifdef TBCO2
-        if(NO_ERROR == tbco2_get_scd4x_forced_calibration(value))
+        error == tbco2_get_scd4x_forced_calibration(value);
 #else
-        if(NO_ERROR == scd4x_get_forced_calibration(value))
+        error == scd4x_get_forced_calibration(value);
 #endif //TBCO2
-		{
+		if(NO_ERROR == error)
+        {
             return sizeof(uint16_t);
 		}
+        else
+        {
+            warn1("E:get_scd4x_frc: %d", error);
+        }
 		return DEVP_EINVAL;
 	}
 	return DEVP_EOFF;
