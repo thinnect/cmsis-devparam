@@ -26,9 +26,9 @@
 #include "log.h"
 
 #ifdef SCD4X_ADDRESS
-#define SCD4X_I2C_ADDRESS SCD4X_ADDRESS;
+#define SCD4X_I2C_ADDRESS SCD4X_ADDRESS
 #else
-#define SCD4X_I2C_ADDRESS 0x62;
+#define SCD4X_I2C_ADDRESS 0x62
 #endif
 
 #define SCD4X_CMD_SET_FORCED_RECALIBRATION 0x362F
@@ -87,10 +87,12 @@ static bool scd_get(int32_t * pco2, uint16_t * ptmp, int32_t * phum)
 	int32_t temp_samples_hum;
 
 	uint16_t scd4x_data_ready;
-
-	if (NO_ERROR == scd4x_get_data_ready_status(&scd4x_data_ready))
+	uint16_t error;
+	error = scd4x_get_data_ready_status(&scd4x_data_ready);
+	if (NO_ERROR == error)
 	{
-		if (NO_ERROR == scd4x_read_measurement(&temp_samples_co2, &temp_samples_tmp, &temp_samples_hum))
+		error = scd4x_read_measurement(&temp_samples_co2, &temp_samples_tmp, &temp_samples_hum);
+		if (NO_ERROR == error)
 		{
 			*pco2 = temp_samples_co2;
 			*ptmp = temp_samples_tmp / 1000;
@@ -99,20 +101,23 @@ static bool scd_get(int32_t * pco2, uint16_t * ptmp, int32_t * phum)
 				(int)(temp_samples_co2),
 				(int)((temp_samples_tmp/1000) * 10),
 				(int)((temp_samples_hum/1000) * 10));
+			return error;
 		}
 		else
 		{
-			err1("read");
+			err1("read scd4x");
+			return error;
 		}
-        osdelay(100);
 	}
-
+	else
+	{
+		return error;
+	}
 }
 
 static int16_t scd4x_get_forced_calibration(uint16_t * co2_ppm)
 {
 	uint16_t word;
-    uint8_t SCD4X_I2C_ADDRESS_TEMP = SCD4X_I2C_ADDRESS;
     int16_t ret = sensirion_i2c_read_cmd(SCD4X_I2C_ADDRESS,
                                  SCD4X_CMD_SET_FORCED_RECALIBRATION, &word,
                                  SENSIRION_NUM_WORDS(word));
@@ -283,7 +288,7 @@ static int dp_scd4x_co2_get(devp_t * param, void * value)
 {
 	if (m_scd_service_mode)
 	{
-		float co2;
+		int32_t co2;
 #ifdef TBCO2
 		co2 = tbco2_get_scd_co2();
 		*((uint16_t*)value) = co2;
@@ -317,7 +322,7 @@ static int dp_scd4x_temp_get(devp_t * param, void * value)
 {
 	if (m_scd_service_mode)
 	{
-		float temp;
+		uint16_t temp;
 #ifdef TBCO2
 		temp = tbco2_get_scd_temperature();
 		*((int32_t*)value) = temp * 10;
@@ -351,7 +356,7 @@ static int dp_scd4x_hum_get(devp_t * param, void * value)
 {
 	if (m_scd_service_mode)
 	{
-		float hum;
+		int32_t hum;
 #ifdef TBCO2
 		hum = tbco2_get_scd_humidity();
 		*((int32_t*)value) = hum * 10;
@@ -459,9 +464,9 @@ static int dp_scd4x_frc_get(devp_t * param, void * value)
 	{
         int16_t error = 0;
 #ifdef TBCO2
-        error == tbco2_get_scd4x_forced_calibration(value);
+        error = tbco2_get_scd4x_forced_calibration(value);
 #else
-        error == scd4x_get_forced_calibration(value);
+        error = scd4x_get_forced_calibration(value);
 #endif //TBCO2
 		if(NO_ERROR == error)
         {
@@ -470,8 +475,9 @@ static int dp_scd4x_frc_get(devp_t * param, void * value)
         else
         {
             warn1("E:get_scd4x_frc: %d", error);
+			return DEVP_EINVAL;
         }
-		return DEVP_EINVAL;
+
 	}
 	return DEVP_EOFF;
 
