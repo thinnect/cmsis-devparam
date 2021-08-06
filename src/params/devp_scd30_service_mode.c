@@ -37,9 +37,9 @@ static uint32_t m_scd_service_mode_start_s;
 #define SCD30_CMD_GET_FIRMWARE_VERSION 0xD100
 
 #ifdef SCD30_ADDRESS
-static const uint8_t SCD30_I2C_ADDRESS = SCD30_ADDRESS;
+#define SCD30_I2C_ADDRESS SCD30_ADDRESS
 #else
-static const uint8_t SCD30_I2C_ADDRESS = 0x61;
+#define SCD30_I2C_ADDRESS 0x61
 #endif
 
 #ifndef TBCO2
