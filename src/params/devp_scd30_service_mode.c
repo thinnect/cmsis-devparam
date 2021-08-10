@@ -16,6 +16,9 @@
 #include "retargeti2c.h"
 #include "retargeti2cconfig.h"
 #include "platform_i2c.h"
+#ifdef TBCO2
+#include "tbco2_app.h"
+#endif // TBCO2
 
 #include "loglevels.h"
 #define __MODUUL__ "scd30s"
@@ -32,15 +35,17 @@ static uint32_t m_scd_service_mode_start_s;
 #define SCD30_CMD_SET_TEMPERATURE_OFFSET 0x5403
 #define SCD30_CMD_SET_FORCED_RECALIBRATION 0x5204
 #define SCD30_CMD_GET_FIRMWARE_VERSION 0xD100
+
 #ifdef SCD30_ADDRESS
-static const uint8_t SCD30_I2C_ADDRESS = SCD30_ADDRESS;
+#define SCD30_I2C_ADDRESS SCD30_ADDRESS
 #else
-static const uint8_t SCD30_I2C_ADDRESS = 0x61;
+#define SCD30_I2C_ADDRESS 0x61
 #endif
 
+#ifndef TBCO2
 static int16_t scd30_get_forced_calibration(uint16_t * co2_ppm)
 {
-    uint16_t word;
+	uint16_t word;
     int16_t ret = sensirion_i2c_read_cmd(SCD30_I2C_ADDRESS,
                                  SCD30_CMD_SET_FORCED_RECALIBRATION, &word,
                                  SENSIRION_NUM_WORDS(word));
@@ -53,7 +58,9 @@ static int16_t scd30_get_forced_calibration(uint16_t * co2_ppm)
 
     return STATUS_OK;
 }
+#endif //TBCO2
 
+#ifndef TBCO2
 static int16_t scd30_get_temperature_offset(uint16_t * temperature_offset)
 {
     uint16_t word;
@@ -69,22 +76,25 @@ static int16_t scd30_get_temperature_offset(uint16_t * temperature_offset)
 
     return STATUS_OK;
 }
+#endif //TBCO2
 
+#ifndef TBCO2
 static int16_t scd30_get_firmware_version(uint16_t * firmware_version)
 {
     uint16_t word;
     int16_t ret = sensirion_i2c_read_cmd(SCD30_I2C_ADDRESS,
                                  SCD30_CMD_GET_FIRMWARE_VERSION, &word,
                                  SENSIRION_NUM_WORDS(word));
-    if (ret != STATUS_OK)
+    if (ret != NO_ERROR)
     {
         return ret;
     }
 
     *firmware_version = word;
 
-    return STATUS_OK;
+    return NO_ERROR;
 }
+#endif //TBCO2
 // -----------------------------------------------------------------------------
 
 // -----------------------------------------------------------------------------
@@ -131,6 +141,7 @@ static bool scd_enable()
 	return false;
 }
 
+#ifndef TBCO2
 static bool scd_get(float * pco2, float * ptmp, float * phum)
 {
 	uint16_t scd30_data_ready = 0;
@@ -163,30 +174,43 @@ static bool scd_get(float * pco2, float * ptmp, float * phum)
 	}
 	return false;
 }
+#endif //TBCO2
 // -----------------------------------------------------------------------------
 
 // -----------------------------------------------------------------------------
-static int dp_scd_service_mode_get(devp_t * param, void * value);
-static int dp_scd_service_mode_set(devp_t * param, bool init, const void * value, uint8_t size);
+static int dp_scd30_service_mode_get(devp_t * param, void * value);
+static int dp_scd30_service_mode_set(devp_t * param, bool init, const void * value, uint8_t size);
 
 static devp_t m_dp_scd_service_mode = {
-	.name = "scd_service_mode",
+	.name = "scd30_service_mode",
 	.type = DP_TYPE_BOOL,
 	.size = sizeof(bool),
 	.persist = false,
-	.getf = dp_scd_service_mode_get,
-	.setf = dp_scd_service_mode_set
+	.getf = dp_scd30_service_mode_get,
+	.setf = dp_scd30_service_mode_set
 };
 
-static int dp_scd_service_mode_get(devp_t * param, void * value)
+static int dp_scd30_service_mode_get(devp_t * param, void * value)
 {
+#ifdef TBCO2
+	*((bool*)value) = tbco2_get_scd_service_mode();
+	return sizeof(bool);
+#else
 	*((bool*)value) = m_scd_service_mode;
 	return sizeof(bool);
+#endif
 }
 
-static int dp_scd_service_mode_set(devp_t * param, bool init, const void * value, uint8_t size)
+static int dp_scd30_service_mode_set(devp_t * param, bool init, const void * value, uint8_t size)
 {
-	bool mode = *(bool*)value;
+	bool mode;
+#ifdef TBCO2
+	//Disabling this functionality when using on TBCO2
+	return 0;
+#else
+	mode = *(bool*)value;
+#endif //TBCO2
+
 	if (mode != m_scd_service_mode)
 	{
 		if (mode)
@@ -249,6 +273,19 @@ static devp_t m_dp_scd_serial = {
 
 static int dp_scd_serial_get(devp_t * param, void * value)
 {
+#ifdef TBCO2
+	m_scd_service_mode = tbco2_get_scd_service_mode();
+	int len = tbco2_get_scd30_serial(value);
+	if(len)
+	{
+		return len;
+	}
+	else
+	{
+		((char*)value)[0] = '?';
+		return 1;
+	}
+#else
 	if(m_scd_service_mode)
 	{
 		if (0 == scd30_read_serial(value))
@@ -258,13 +295,13 @@ static int dp_scd_serial_get(devp_t * param, void * value)
 		((char*)value)[0] = '?';
 		return 1;
 	}
+#endif //TBCO2
 	return DEVP_EOFF;
 }
 // -----------------------------------------------------------------------------
 
 // -----------------------------------------------------------------------------
 static int dp_scd_firmware_get(devp_t * param, void * value);
-
 static devp_t m_dp_scd_firmware = {
 	.name = "scd_firmware",
 	.type = DP_TYPE_STRING,
@@ -276,6 +313,20 @@ static devp_t m_dp_scd_firmware = {
 
 static int dp_scd_firmware_get(devp_t * param, void * value)
 {
+#ifdef TBCO2
+	m_scd_service_mode = tbco2_get_scd_service_mode();
+	if(m_scd_service_mode)
+	{
+		uint16_t firmware;
+		if(0 == tbco2_get_scd30_firmware_version(&firmware))
+		{
+			snprintf(value, param->size, "%d.%d", (int)(firmware >> 8), (int)(firmware & 0xFF));
+			return strlen(value);
+		}
+		return DEVP_EINVAL;
+	}
+	return DEVP_EOFF;
+#else
 	if(m_scd_service_mode)
 	{
 		uint16_t firmware;
@@ -287,6 +338,7 @@ static int dp_scd_firmware_get(devp_t * param, void * value)
 		return DEVP_EINVAL;
 	}
 	return DEVP_EOFF;
+#endif
 }
 // -----------------------------------------------------------------------------
 
@@ -307,11 +359,17 @@ static int dp_scd_co2_get(devp_t * param, void * value)
 	if (m_scd_service_mode)
 	{
 		float co2;
+#ifdef TBCO2
+		co2 = tbco2_get_scd_co2();
+		*((uint16_t*)value) = co2;
+		return sizeof(uint16_t);
+#else
 		if(scd_get(&co2, NULL, NULL))
 		{
 			*((uint16_t*)value) = co2;
 			return sizeof(uint16_t);
 		}
+#endif //TBCO2
 		return 0;
 	}
 	return DEVP_EOFF;
@@ -335,11 +393,17 @@ static int dp_scd_temp_get(devp_t * param, void * value)
 	if (m_scd_service_mode)
 	{
 		float temp;
+#ifdef TBCO2
+		temp = tbco2_get_scd_temperature();
+		*((int16_t*)value) = temp * 10;
+		return sizeof(int16_t);
+#else
 		if(scd_get(NULL, &temp, NULL))
 		{
 			*((int16_t*)value) = temp * 10;
 			return sizeof(int16_t);
 		}
+#endif //TBCO2
 		return 0;
 	}
 	return DEVP_EOFF;
@@ -363,12 +427,19 @@ static int dp_scd_hum_get(devp_t * param, void * value)
 	if (m_scd_service_mode)
 	{
 		float hum;
+#ifdef TBCO2
+		hum = tbco2_get_scd_humidity();
+		*((uint16_t*)value) = hum * 10;
+		return sizeof(uint16_t);
+#else
+
 		if(scd_get(NULL, NULL, &hum))
 		{
 			*((uint16_t*)value) = hum * 10;
 			return sizeof(uint16_t);
 		}
 		return 0;
+#endif //TBCO2
 	}
 	return DEVP_EOFF;
 }
@@ -391,10 +462,17 @@ static int dp_scd_tempoffs_get(devp_t * param, void * value)
 {
 	if (m_scd_service_mode)
 	{
+#ifdef TBCO2
+		if(0 == tbco2_get_scd30_temperature_offset(value))
+		{
+			return sizeof(uint16_t);
+		}
+#else
 		if(0 == scd30_get_temperature_offset(value))
 		{
 			return sizeof(uint16_t);
 		}
+#endif //TBCO2
 		return DEVP_EINVAL;
 	}
 	return DEVP_EOFF;
@@ -404,6 +482,17 @@ static int dp_scd_tempoffs_set(devp_t * param, bool init, const void * value, ui
 {
 	if (sizeof(uint16_t) == size)
 	{
+#ifdef TBCO2
+		if(m_scd_service_mode)
+		{
+			uint16_t temperature_offset = *((uint16_t*)value);
+			if(0 == tbco2_set_scd30_temperature_offset(temperature_offset))
+			{
+				return 0;
+			}
+			return DEVP_EINVAL;
+		}
+#else
 		if (m_scd_service_mode)
 		{
 			uint16_t temperature_offset = *((uint16_t*)value);
@@ -413,6 +502,7 @@ static int dp_scd_tempoffs_set(devp_t * param, bool init, const void * value, ui
 			}
 			return DEVP_EINVAL;
 		}
+#endif
 		return DEVP_EOFF;
 	}
 	return DEVP_ESIZE;
@@ -435,6 +525,17 @@ static devp_t m_dp_scd_frc = {
 
 static int dp_scd_frc_get(devp_t * param, void * value)
 {
+#ifdef TBCO2
+	if (m_scd_service_mode)
+	{
+		if(0 == tbco2_get_scd30_forced_calibration(value))
+		{
+			return sizeof(uint16_t);
+		}
+		return DEVP_EINVAL;
+	}
+	return DEVP_EOFF;
+#else
 	if (m_scd_service_mode)
 	{
 		if(0 == scd30_get_forced_calibration(value))
@@ -444,6 +545,7 @@ static int dp_scd_frc_get(devp_t * param, void * value)
 		return DEVP_EINVAL;
 	}
 	return DEVP_EOFF;
+#endif //TBCO2
 }
 
 static int dp_scd_frc_set(devp_t * param, bool init, const void * value, uint8_t size)
