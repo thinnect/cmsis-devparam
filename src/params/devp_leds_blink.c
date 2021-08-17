@@ -14,10 +14,10 @@
 
 #include <string.h>
 
-static uint8_t m_blink_leds;
+static uint8_t m_blink_leds = 0;
 
-static uint32_t m_blink_on_ms = 0;
-static uint32_t m_blink_off_ms = 0;
+static uint32_t m_blink_on_ms = 0; // Disabled when 0
+static uint32_t m_blink_off_ms = 0; // Disabled when 0
 
 static osTimerId_t m_blink_timer;
 static osMutexId_t m_blink_mutex;
