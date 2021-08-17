@@ -112,7 +112,7 @@ static int dp_leds_blink_on_get (devp_t * param, void * value)
 
 static int dp_leds_blink_on_set (devp_t * param, bool init, const void * value, uint8_t size)
 {
-	if (sizeof(uint32_t) == size)
+	if (sizeof(m_blink_on_ms) == size)
 	{
 		while (osOK != osMutexAcquire(m_blink_mutex, osWaitForever));
 		memcpy(&m_blink_on_ms, value, size);
@@ -145,7 +145,7 @@ static int dp_leds_blink_off_get (devp_t * param, void * value)
 
 static int dp_leds_blink_off_set (devp_t * param, bool init, const void * value, uint8_t size)
 {
-	if (sizeof(uint32_t) == size)
+	if (sizeof(m_blink_off_ms) == size)
 	{
 		while (osOK != osMutexAcquire(m_blink_mutex, osWaitForever));
 		memcpy(&m_blink_off_ms, value, size);
