@@ -451,59 +451,52 @@ static int dp_scd4x_frc_set(devp_t * param, bool init, const void * value, uint8
 
 static devp_t m_dp_scd4x_frc = {
     .name = "scd4x_co2_frc",
-    .type = DP_TYPE_UINT16,
-    .size = sizeof(uint16_t),
+    .type = DP_TYPE_INT16,
+    .size = sizeof(int16_t),
     .persist = false,
     .getf = dp_scd4x_frc_get,
     .setf = dp_scd4x_frc_set
 };
 
+static int16_t m_scd4x_frc = 0;
+
 static int dp_scd4x_frc_get(devp_t * param, void * value)
 {
-    if (m_scd_service_mode)
-    {
-        int16_t error = 0;
-#ifdef TBCO2
-        error = tbco2_get_scd4x_forced_calibration(value);
-#else
-        error = scd4x_get_forced_calibration(value);
-#endif //TBCO2
-        if(NO_ERROR == error)
-        {
-            return sizeof(uint16_t);
-        }
-        else
-        {
-            warn1("E:get_scd4x_frc: %d", error);
-            return DEVP_EINVAL;
-        }
-
-    }
-    return DEVP_EOFF;
-
+    memcpy(value, &m_scd4x_frc, sizeof(m_scd4x_frc));
+    return sizeof(m_scd4x_frc);
 }
 
 static int dp_scd4x_frc_set(devp_t * param, bool init, const void * value, uint8_t size)
 {
-    if (sizeof(uint16_t) == size)
+    if (sizeof(int16_t) == size)
     {
         if (m_scd_service_mode)
         {
             uint16_t frc = *((uint16_t*)value);
             uint16_t result = NO_ERROR;
+            uint16_t error = NO_ERROR;
+
 #ifdef TBCO2
-            if (NO_ERROR == tbco2_set_scd4x_forced_calibration(frc, &result))
+            error = tbco2_set_scd4x_forced_calibration(frc, &result);
 #else
-            if(NO_ERROR == scd4x_perform_forced_recalibration(frc, &result))
+            error = scd4x_perform_forced_recalibration(frc, &result);
 #endif //TBCO2
+            //debug1("acquire frc");
+            if(NO_ERROR == error)
             {
                 if (0xFFFF == result)
                 {
-                    return DEVP_EINVAL;
+                    m_scd4x_frc = -1;
+                    warn1("scd4x_set_frc_result 0xFFFF");
+                    return DEVP_EFAIL;
                 }
-                return NO_ERROR;
+                m_scd4x_frc = frc;
+                debug1("offset was %"PRIu16, result);
+                return sizeof(int16_t);
             }
-            return DEVP_EINVAL;
+            warn1("scd4x_set_frc error error: %d frc: %d result: %d", error, frc, result);
+            m_scd4x_frc = -2;
+            return DEVP_EFAIL;
         }
         return DEVP_EOFF;
     }
