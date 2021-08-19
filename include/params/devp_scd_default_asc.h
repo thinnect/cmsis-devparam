@@ -1,7 +1,7 @@
 /**
- * Active Message address parameter.
+ * SCD30/4x default value for automatic self calibration.
  *
- * Copyright Thinnect Inc. 2020
+ * Copyright Thinnect Inc. 2021
  * @license MIT
  */
 #ifndef DEVP_SCD_DEFAULT_ASC_H_
@@ -15,9 +15,9 @@
 void devp_scd_default_asc_init();
 
 /**
- * Get default_scd.
+ * Get SCD ASC default value.
  *
- * @return AM address.
+ * @return default value for ASC.
  */
 uint8_t devp_scd_default_asc_get();
 
