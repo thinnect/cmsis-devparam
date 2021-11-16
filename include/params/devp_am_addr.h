@@ -1,5 +1,5 @@
 /**
- * Active Message address parameter.
+ * ActiveMessage address parameter.
  *
  * Copyright Thinnect Inc. 2020
  * @license MIT
@@ -12,13 +12,13 @@
 /**
  * Initialize AM addr parameter.
  */
-void devp_am_addr_init();
+void devp_am_addr_init (void);
 
 /**
  * Get address.
  *
  * @return AM address.
  */
-uint16_t devp_am_addr_get();
+uint16_t devp_am_addr_get (void);
 
 #endif//DEVP_AM_ADDR_H_
