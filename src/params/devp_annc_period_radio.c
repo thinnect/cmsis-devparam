@@ -36,7 +36,7 @@ void devp_annc_period_radio_init (uint32_t default_period_s, uint32_t min_period
 {
 	m_annc_period_radio_s = default_period_s;
 	devp_register(&m_dp_annc_period_radio);
-	if (m_annc_period_radio_s < min_period_s)
+	if ((m_annc_period_radio_s > 0) && (m_annc_period_radio_s < min_period_s))
 	{
 		m_annc_period_radio_s = min_period_s;
 	}

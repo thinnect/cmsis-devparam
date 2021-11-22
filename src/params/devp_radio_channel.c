@@ -156,7 +156,14 @@ void devp_radio_channel_init(get_radio_channel_f f_current, devp_changed_cb_f ca
 	{
 		m_radio_ch_default = DEFAULT_RADIO_CHANNEL;
 		int r = devp_store(m_dp_radio_ch_default.name, m_dp_radio_ch_default.type, &m_radio_ch_default, sizeof(uint8_t));
-		logger(r == sizeof(uint8_t) ? LOG_DEBUG1 : LOG_ERR1, "dflt ch %d (%d)", (int)DEFAULT_RADIO_CHANNEL, r);
+		if (sizeof(uint8_t) == r)
+		{
+			debug1("dflt ch %d", (int)DEFAULT_RADIO_CHANNEL);
+		}
+		else
+		{
+			err1("s=%d", r);
+		}
 	}
 
 	if (0 == m_radio_channel)

@@ -36,7 +36,7 @@ void devp_annc_period_serial_init (uint32_t default_period_s, uint32_t min_perio
 {
 	m_annc_period_serial_s = default_period_s;
 	devp_register(&m_dp_annc_period_serial);
-	if (m_annc_period_serial_s < min_period_s)
+	if ((m_annc_period_serial_s > 0) && (m_annc_period_serial_s < min_period_s))
 	{
 		m_annc_period_serial_s = min_period_s;
 	}

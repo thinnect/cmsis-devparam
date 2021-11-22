@@ -36,7 +36,7 @@ void devp_annc_period_mesh_init (uint32_t default_period_s, uint32_t min_period_
 {
 	m_annc_period_mesh_s = default_period_s;
 	devp_register(&m_dp_annc_period_mesh);
-	if (m_annc_period_mesh_s < min_period_s)
+	if ((m_annc_period_mesh_s > 0) && (m_annc_period_mesh_s < min_period_s))
 	{
 		m_annc_period_mesh_s = min_period_s;
 	}
