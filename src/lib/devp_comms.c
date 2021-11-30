@@ -97,6 +97,7 @@ static comms_msg_t * errorSeqnum(comms_layer_t * comms, const comms_address_t * 
 	if (NULL != p_msg)
 	{
 		comms_init_message(comms, p_msg);
+		comms_set_packet_type(comms, p_msg, AMID_DEVICE_PARAMETERS);
 		comms_set_destination(comms, p_msg, destination);
 
 		dp_error_parameter_seqnum_t* ep =
@@ -128,6 +129,7 @@ static comms_msg_t * errorId (comms_layer_t * comms, const comms_address_t * des
 	if (NULL != p_msg)
 	{
 		comms_init_message(comms, p_msg);
+		comms_set_packet_type(comms, p_msg, AMID_DEVICE_PARAMETERS);
 		comms_set_destination(comms, p_msg, destination);
 
 		dp_error_parameter_id_t* ep =
@@ -161,6 +163,7 @@ static comms_msg_t * sendValue(comms_layer_t * comms, const comms_address_t * de
 	if (NULL != p_msg)
 	{
 		comms_init_message(comms, p_msg);
+		comms_set_packet_type(comms, p_msg, AMID_DEVICE_PARAMETERS);
 		comms_set_destination(comms, p_msg, destination);
 
 		uint8_t idlen = strlen(fid);

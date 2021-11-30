@@ -177,4 +177,9 @@ void devp_radio_channel_init(get_radio_channel_f f_current, devp_changed_cb_f ca
 #if !defined(DEVP_RADIO_CHANNEL_REQUIRE_REBOOT) || defined(DEVP_RADIO_CHANNEL_PERSISTENT)
 	devp_register(&m_dp_radio_channel);
 #endif//DEVP_RADIO_CHANNEL_REQUIRE_REBOOT
+
+	if (0 == m_radio_channel) // Final fallback
+	{
+		m_radio_channel = DEFAULT_RADIO_CHANNEL;
+	}
 }
