@@ -344,15 +344,15 @@ static int dp_scd4x_hum_get(devp_t * param, void * value)
 }
 // -----------------------------------------------------------------------------
 
-static uint32_t m_scd4x_tempoffs_default;
+static int32_t m_scd4x_tempoffs_default;
 
 static int dp_scd4x_tempoffs_default_get (devp_t * param, void * value);
 static int dp_scd4x_tempoffs_default_set (devp_t * param, bool init, const void * value, uint8_t size);
 
 static devp_t m_dp_scd4x_tempoffs_default = {
 	.name = "scd4x_tempoffs_default",
-	.type = DP_TYPE_UINT32,
-	.size = sizeof(uint32_t),
+	.type = DP_TYPE_INT32,
+	.size = sizeof(int32_t),
 	.persist = true,
 	.getf = dp_scd4x_tempoffs_default_get,
 	.setf = dp_scd4x_tempoffs_default_set
@@ -360,14 +360,14 @@ static devp_t m_dp_scd4x_tempoffs_default = {
 
 static int dp_scd4x_tempoffs_default_get (devp_t * param, void * value)
 {
-	*((uint32_t*)value) = m_scd4x_tempoffs_default;
-	return sizeof(uint32_t);
+	*((int32_t*)value) = m_scd4x_tempoffs_default;
+	return sizeof(int32_t);
 }
 
 static int dp_scd4x_tempoffs_default_set (devp_t * param, bool init, const void * value, uint8_t size)
 {
-	m_scd4x_tempoffs_default = *((uint32_t*)value);
-	return sizeof(uint32_t);
+	m_scd4x_tempoffs_default = *((int32_t*)value);
+	return sizeof(int32_t);
 }
 
 void dp_scd4x_tempoffs_default_init ()
@@ -376,7 +376,7 @@ void dp_scd4x_tempoffs_default_init ()
     devp_register(&m_dp_scd4x_tempoffs_default);
 }
 
-uint32_t devp_scd4x_tempoffs_default_get ()
+int32_t devp_scd4x_tempoffs_default_get ()
 {
     return m_scd4x_tempoffs_default;
 }
