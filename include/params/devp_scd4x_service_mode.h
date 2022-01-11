@@ -19,6 +19,6 @@ void devp_scd4x_service_mode_init ();
 */
 void dp_scd4x_tempoffs_default_init ();
 
-uint32_t devp_scd4x_tempoffs_default_get ();
+int32_t devp_scd4x_tempoffs_default_get ();
 
 #endif//DEVP_SCD4X_SERVICE_MODE_H_
