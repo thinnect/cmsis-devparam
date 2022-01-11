@@ -109,12 +109,12 @@ static bool scd_get(int32_t * pco2, uint16_t * ptmp, int32_t * phum)
         if (NO_ERROR == error)
         {
             *pco2 = temp_samples_co2;
-            *ptmp = temp_samples_tmp / 1000;
-            *phum = temp_samples_hum / 1000;
+            *ptmp = temp_samples_tmp / 100;
+            *phum = temp_samples_hum / 100;
             debug1("CO2: %d ppm, T: %d/10 *C, HUM: %d/10 %%RH",
                 (int)(temp_samples_co2),
-                (int)((temp_samples_tmp/1000) * 10),
-                (int)((temp_samples_hum/1000) * 10));
+                (int)(temp_samples_tmp/100),
+                (int)(temp_samples_hum/100));
             return error;
         }
         else
@@ -305,7 +305,7 @@ static int dp_scd4x_temp_get(devp_t * param, void * value)
             return DEVP_EFAIL;
         }
 #endif //TBCO2
-        *((int32_t*)value) = temp * 10;
+        *((int32_t*)value) = temp;
         return sizeof(int32_t);
     }
     return DEVP_EOFF;
@@ -343,6 +343,44 @@ static int dp_scd4x_hum_get(devp_t * param, void * value)
     return DEVP_EOFF;
 }
 // -----------------------------------------------------------------------------
+
+static int32_t m_scd4x_tempoffs_default;
+
+static int dp_scd4x_tempoffs_default_get (devp_t * param, void * value);
+static int dp_scd4x_tempoffs_default_set (devp_t * param, bool init, const void * value, uint8_t size);
+
+static devp_t m_dp_scd4x_tempoffs_default = {
+	.name = "scd4x_tempoffs_default",
+	.type = DP_TYPE_INT32,
+	.size = sizeof(int32_t),
+	.persist = true,
+	.getf = dp_scd4x_tempoffs_default_get,
+	.setf = dp_scd4x_tempoffs_default_set
+};
+
+static int dp_scd4x_tempoffs_default_get (devp_t * param, void * value)
+{
+	*((int32_t*)value) = m_scd4x_tempoffs_default;
+	return sizeof(int32_t);
+}
+
+static int dp_scd4x_tempoffs_default_set (devp_t * param, bool init, const void * value, uint8_t size)
+{
+	m_scd4x_tempoffs_default = *((int32_t*)value);
+	return sizeof(int32_t);
+}
+
+void dp_scd4x_tempoffs_default_init ()
+{
+    m_scd4x_tempoffs_default = 0;
+    devp_register(&m_dp_scd4x_tempoffs_default);
+}
+
+int32_t devp_scd4x_tempoffs_default_get ()
+{
+    return m_scd4x_tempoffs_default;
+}
+
 
 // -----------------------------------------------------------------------------
 static int dp_scd4x_tempoffs_get(devp_t * param, void * value);
