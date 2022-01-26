@@ -8,7 +8,7 @@
 #include <string.h>
 
 #include "devp.h"
-
+#include "devp_service_timeout.h"
 #include "mist_comm.h"
 
 #include "endianness.h"
@@ -38,6 +38,7 @@ static osMutexId_t m_mutex;
 static osThreadId_t m_devp_thread_id;
 static osTimerId_t m_sleep_timer;
 static comms_msg_t m_msg;
+static uint32_t m_rcomm_keepalive_timeout;
 static bool m_busy;
 static comms_layer_t * m_rx_iface;
 
@@ -487,9 +488,15 @@ static void devp_comms_loop()
 					{
 						if(NULL != mp_sleep_ctrl[i]) // Sleep control is optional
 						{
-							debug1("block %d", i);
+
 							comms_sleep_block(mp_sleep_ctrl[i]);
-							osTimerStart(m_sleep_timer, DEVP_SLEEP_TIMEOUT_MS);
+							m_rcomm_keepalive_timeout = devp_service_mode_timeout_get();
+							if(!m_rcomm_keepalive_timeout)
+							{
+								m_rcomm_keepalive_timeout = DEVP_SLEEP_TIMEOUT_MS;
+							}
+							debug1("block %d for %d sec", i, m_rcomm_keepalive_timeout/1000);
+							osTimerStart(m_sleep_timer, m_rcomm_keepalive_timeout);
 						}
 						break;
 					}
@@ -521,7 +528,11 @@ bool devp_comms_init()
 {
 	m_mutex = osMutexNew(NULL);
 	m_sleep_timer = osTimerNew(sleep_timer_fired_cb, osTimerOnce, NULL, NULL);
-
+	m_rcomm_keepalive_timeout = devp_service_mode_timeout_get();
+	if(!m_rcomm_keepalive_timeout)
+	{
+		m_rcomm_keepalive_timeout = DEVP_SLEEP_TIMEOUT_MS;
+	}
 	m_busy = false;
 
 	for(int i=0;i<DEVP_MAX_IFACES;i++)
