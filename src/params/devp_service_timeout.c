@@ -3,7 +3,8 @@
  * Is stored in persistent memory.
  * Default value currently set to 5 sec
  *
- * Copyright Thinnect Inc. 2021
+ * Copyright Thinnect Inc. 2022
+ * @author Lembitu Valdmets
  * @license MIT
  */
 #include "devp_service_timeout.h"

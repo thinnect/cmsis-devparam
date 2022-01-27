@@ -1,7 +1,10 @@
 /**
- * SCD30/4x default value for automatic self calibration.
+ * Service mode timeout for deviceparameter.
+ * Every time when deviceparameter is used devp_comms uses timer to keep radio alive for some time. Default is 5 seconds.
+ * This timeout can be changed via this devparam.
  *
- * Copyright Thinnect Inc. 2021
+ * Copyright Thinnect Inc. 2022
+ * @author Lembitu Valdmets
  * @license MIT
  */
 #ifndef DEVP_SERVICE_MODE_H_
