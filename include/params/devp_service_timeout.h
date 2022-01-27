@@ -10,14 +10,14 @@
 #include "devp.h"
 
 /**
- * Initialize scd default automatic self calibration parameter.
+ * Initialize default service mode timeout parameter.
  */
 void devp_service_mode_timeout_init ();
 
 /**
  * Get current timeout value in milliseconds.
  *
- * @return default value for ASC.
+ * @return service mode timeout in milliseconds.
  */
 uint32_t devp_service_mode_timeout_get ();
 

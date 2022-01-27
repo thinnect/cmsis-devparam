@@ -8,6 +8,7 @@
  */
 #include "devp_service_timeout.h"
 
+
 #ifndef DEVP_SERVICE_TIMEOUT_MS
 #define DEVP_SERVICE_TIMEOUT_MS 5000
 #endif//DEVP_SERVICE_TIMEOUT_MS
@@ -18,7 +19,7 @@ static int dp_service_mode_timeout_get (devp_t * param, void * value);
 static int dp_service_mode_timeout_set (devp_t * param, bool init, const void * value, uint8_t size);
 
 static devp_t m_dp_service_mode_timeout = {
-	.name = "service_mode_timeout",
+	.name = "service_to",
 	.type = DP_TYPE_UINT32,
 	.size = sizeof(uint32_t),
 	.persist = true,
@@ -35,7 +36,7 @@ static int dp_service_mode_timeout_get (devp_t * param, void * value)
 static int dp_service_mode_timeout_set (devp_t * param, bool init, const void * value, uint8_t size)
 {
 	m_service_mode_timeout = *((uint32_t*)value);
-	return sizeof(uint32_t);
+    return sizeof(uint32_t);
 }
 
 void devp_service_mode_timeout_init ()
