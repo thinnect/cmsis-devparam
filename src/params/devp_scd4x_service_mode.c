@@ -350,7 +350,7 @@ static int dp_scd4x_tempoffs_default_get (devp_t * param, void * value);
 static int dp_scd4x_tempoffs_default_set (devp_t * param, bool init, const void * value, uint8_t size);
 
 static devp_t m_dp_scd4x_tempoffs_default = {
-	.name = "scd4x_tempoffs_default",
+	.name = "scd4x_tffs_def",
 	.type = DP_TYPE_INT32,
 	.size = sizeof(int32_t),
 	.persist = true,
