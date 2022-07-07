@@ -90,6 +90,7 @@ static comms_error_t errorSeqnum(comms_layer_t * comms, const comms_address_t * 
                                  bool exists, int error, uint8_t seqnum)
 {
 	comms_init_message(comms, &m_msg);
+	comms_set_packet_type(comms, &m_msg, AMID_DEVICE_PARAMETERS);
 	comms_set_destination(comms, &m_msg, destination);
 
 	dp_error_parameter_seqnum_t* ep =
@@ -114,6 +115,7 @@ static comms_error_t errorId(comms_layer_t * comms, const comms_address_t * dest
                              bool exists, int error, const char * idstr, uint8_t idlen)
 {
 	comms_init_message(comms, &m_msg);
+	comms_set_packet_type(comms, &m_msg, AMID_DEVICE_PARAMETERS);
 	comms_set_destination(comms, &m_msg, destination);
 
 	dp_error_parameter_id_t* ep =
@@ -141,6 +143,7 @@ static comms_error_t sendValue(comms_layer_t * comms, const comms_address_t * de
 	debugb3("dp.v[%u] %s", value, length, idx, fid);
 
 	comms_init_message(comms, &m_msg);
+	comms_set_packet_type(comms, &m_msg, AMID_DEVICE_PARAMETERS);
 	comms_set_destination(comms, &m_msg, destination);
 
 	uint8_t idlen = strlen(fid);
