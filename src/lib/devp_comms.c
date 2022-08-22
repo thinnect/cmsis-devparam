@@ -8,12 +8,8 @@
 #include <string.h>
 
 #include "devp.h"
-<<<<<<< HEAD
-#include "devp_service_timeout.h"
-#include "mist_comm.h"
-=======
 #include "devp_comms.h"
->>>>>>> dev
+#include "devp_service_timeout.h"
 
 #include "endianness.h"
 
@@ -41,13 +37,7 @@
 
 static osThreadId_t m_devp_thread_id;
 static osTimerId_t m_sleep_timer;
-<<<<<<< HEAD
-static comms_msg_t m_msg;
 static uint32_t m_rcomm_keepalive_timeout;
-static bool m_busy;
-static comms_layer_t * m_rx_iface;
-=======
->>>>>>> dev
 
 static osMutexId_t m_rx_mutex;
 static comms_msg_t m_rx_msg; // We keep a dedicated message for RX purpose and do not use the pool
@@ -105,18 +95,8 @@ static void msg_send_done (comms_layer_t * comms, comms_msg_t * msg, comms_error
 static comms_msg_t * errorSeqnum(comms_layer_t * comms, const comms_address_t * destination,
                                  bool exists, int error, uint8_t seqnum)
 {
-<<<<<<< HEAD
-	comms_init_message(comms, &m_msg);
-	comms_set_packet_type(comms, &m_msg, AMID_DEVICE_PARAMETERS);
-	comms_set_destination(comms, &m_msg, destination);
-
-	dp_error_parameter_seqnum_t* ep =
-	    (dp_error_parameter_seqnum_t*)comms_get_payload(comms, &m_msg, sizeof(dp_error_parameter_seqnum_t));
-	if (NULL != ep)
-=======
 	comms_msg_t * p_msg = comms_pool_get(mp_pool, 0);
 	if (NULL != p_msg)
->>>>>>> dev
 	{
 		comms_init_message(comms, p_msg);
 		comms_set_packet_type(comms, p_msg, AMID_DEVICE_PARAMETERS);
@@ -143,15 +123,6 @@ static comms_msg_t * errorSeqnum(comms_layer_t * comms, const comms_address_t * 
 	return NULL;
 }
 
-<<<<<<< HEAD
-static comms_error_t errorId(comms_layer_t * comms, const comms_address_t * destination,
-                             bool exists, int error, const char * idstr, uint8_t idlen)
-{
-	comms_init_message(comms, &m_msg);
-	comms_set_packet_type(comms, &m_msg, AMID_DEVICE_PARAMETERS);
-	comms_set_destination(comms, &m_msg, destination);
-=======
->>>>>>> dev
 
 static comms_msg_t * errorId (comms_layer_t * comms, const comms_address_t * destination,
                               bool exists, int error, const char * idstr, uint8_t idlen)
@@ -190,20 +161,8 @@ static comms_msg_t * sendValue(comms_layer_t * comms, const comms_address_t * de
                                const char* fid, uint8_t idx, uint8_t tp, void* value, uint8_t length)
 {
 	debugb3("dp.v[%u] %s", value, length, idx, fid);
-<<<<<<< HEAD
-
-	comms_init_message(comms, &m_msg);
-	comms_set_packet_type(comms, &m_msg, AMID_DEVICE_PARAMETERS);
-	comms_set_destination(comms, &m_msg, destination);
-
-	uint8_t idlen = strlen(fid);
-	dp_parameter_t* df =
-	    (dp_parameter_t*) comms_get_payload(comms, &m_msg, sizeof(dp_parameter_t) + idlen + length);
-	if (NULL != df)
-=======
 	comms_msg_t * p_msg = comms_pool_get(mp_pool, 0);
 	if (NULL != p_msg)
->>>>>>> dev
 	{
 		comms_init_message(comms, p_msg);
 		comms_set_packet_type(comms, p_msg, AMID_DEVICE_PARAMETERS);
@@ -548,9 +507,14 @@ static void sleep_block_comms (comms_layer_t * p_comms)
 		{
 			if(NULL != mp_sleep_ctrl[i]) // Sleep control is optional
 			{
-				debug1("block %d", i);
+				m_rcomm_keepalive_timeout = devp_service_mode_timeout_get();
+				if(!m_rcomm_keepalive_timeout)
+				{
+					m_rcomm_keepalive_timeout = DEVP_SLEEP_TIMEOUT_MS;
+				}
+				debug1("block %d for %d sec", i, m_rcomm_keepalive_timeout/1000);
 				comms_sleep_block(mp_sleep_ctrl[i]);
-				osTimerStart(m_sleep_timer, DEVP_SLEEP_TIMEOUT_MS);
+				osTimerStart(m_sleep_timer, m_rcomm_keepalive_timeout);
 			}
 			break;
 		}
@@ -607,27 +571,8 @@ static void devp_comms_loop (void * arg)
 				logger(COMMS_SUCCESS == err ? LOG_DEBUG1: LOG_WARN1, "snd %u", err);
 				if (err != COMMS_SUCCESS)
 				{
-<<<<<<< HEAD
-					if(m_rx_iface == mp_ifaces[i])
-					{
-						if(NULL != mp_sleep_ctrl[i]) // Sleep control is optional
-						{
-
-							comms_sleep_block(mp_sleep_ctrl[i]);
-							m_rcomm_keepalive_timeout = devp_service_mode_timeout_get();
-							if(!m_rcomm_keepalive_timeout)
-							{
-								m_rcomm_keepalive_timeout = DEVP_SLEEP_TIMEOUT_MS;
-							}
-							debug1("block %d for %d sec", i, m_rcomm_keepalive_timeout/1000);
-							osTimerStart(m_sleep_timer, m_rcomm_keepalive_timeout);
-						}
-						break;
-					}
-=======
 					comms_pool_put(mp_pool, p_msg);
 					p_msg = NULL;
->>>>>>> dev
 				}
 			}
 		}
@@ -639,7 +584,6 @@ static void devp_comms_loop (void * arg)
 	}
 }
 
-
 static void sleep_timer_fired_cb()
 {
 	osThreadFlagsSet(m_devp_thread_id, DEVP_FLAGS_SLEEP);
@@ -648,16 +592,6 @@ static void sleep_timer_fired_cb()
 
 bool devp_comms_init (comms_pool_t * p_pool)
 {
-<<<<<<< HEAD
-	m_mutex = osMutexNew(NULL);
-	m_sleep_timer = osTimerNew(sleep_timer_fired_cb, osTimerOnce, NULL, NULL);
-	m_rcomm_keepalive_timeout = devp_service_mode_timeout_get();
-	if(!m_rcomm_keepalive_timeout)
-	{
-		m_rcomm_keepalive_timeout = DEVP_SLEEP_TIMEOUT_MS;
-	}
-	m_busy = false;
-=======
 	mp_pool = p_pool;
 
 	const osMutexAttr_t mutex_param = { .attr_bits = osMutexPrioInherit };
@@ -682,7 +616,6 @@ bool devp_comms_init (comms_pool_t * p_pool)
 		osMutexDelete(m_rx_mutex);
 		return false;
 	}
->>>>>>> dev
 
 	for(int i=0;i<DEVP_MAX_IFACES;i++)
 	{
