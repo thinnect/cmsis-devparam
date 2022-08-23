@@ -9,9 +9,11 @@
 
 #include "devp.h"
 #include "devp_comms.h"
-#include "devp_service_timeout.h"
-
 #include "endianness.h"
+
+#ifdef SERVICE_MODE_TIMEOUT
+#include "devp_service_timeout.h"
+#endif //SERVICE_MODE_TIMEOUT
 
 #include "loglevels.h"
 #define __MODUUL__ "dpc"
@@ -31,9 +33,9 @@
 #define DEVP_MAX_VALUE_SIZE 64
 #endif//DEVP_MAX_VALUE_SIZE
 
-#ifndef DEVP_SLEEP_TIMEOUT_MS
-#define DEVP_SLEEP_TIMEOUT_MS 30000
-#endif//DEVP_SLEEP_TIMEOUT_MS
+#ifndef DEVP_DEFAULT_SLEEP_TIMEOUT_MS
+#define DEVP_DEFAULT_SLEEP_TIMEOUT_MS 30000
+#endif//DEVP_DEFAULT_SLEEP_TIMEOUT_MS
 
 static osThreadId_t m_devp_thread_id;
 static osTimerId_t m_sleep_timer;
@@ -507,10 +509,12 @@ static void sleep_block_comms (comms_layer_t * p_comms)
 		{
 			if(NULL != mp_sleep_ctrl[i]) // Sleep control is optional
 			{
+				#ifdef SERVICE_MODE_TIMEOUT
 				m_rcomm_keepalive_timeout = devp_service_mode_timeout_get();
+				#endif //SERVICE_MODE_TIMEOUT
 				if(!m_rcomm_keepalive_timeout)
 				{
-					m_rcomm_keepalive_timeout = DEVP_SLEEP_TIMEOUT_MS;
+					m_rcomm_keepalive_timeout = DEVP_DEFAULT_SLEEP_TIMEOUT_MS;
 				}
 				debug1("block %d for %d sec", i, m_rcomm_keepalive_timeout/1000);
 				comms_sleep_block(mp_sleep_ctrl[i]);
