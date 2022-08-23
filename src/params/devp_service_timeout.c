@@ -20,23 +20,23 @@ static int dp_service_mode_timeout_get (devp_t * param, void * value);
 static int dp_service_mode_timeout_set (devp_t * param, bool init, const void * value, uint8_t size);
 
 static devp_t m_dp_service_mode_timeout = {
-	.name = "service_to",
-	.type = DP_TYPE_UINT32,
-	.size = sizeof(uint32_t),
-	.persist = true,
-	.getf = dp_service_mode_timeout_get,
-	.setf = dp_service_mode_timeout_set
+    .name = "service_to",
+    .type = DP_TYPE_UINT32,
+    .size = sizeof(uint32_t),
+    .persist = true,
+    .getf = dp_service_mode_timeout_get,
+    .setf = dp_service_mode_timeout_set
 };
 
 static int dp_service_mode_timeout_get (devp_t * param, void * value)
 {
-	*((uint32_t*)value) = m_service_mode_timeout;
-	return sizeof(uint32_t);
+    *((uint32_t*)value) = m_service_mode_timeout;
+    return sizeof(uint32_t);
 }
 
 static int dp_service_mode_timeout_set (devp_t * param, bool init, const void * value, uint8_t size)
 {
-	m_service_mode_timeout = *((uint32_t*)value);
+    m_service_mode_timeout = *((uint32_t*)value);
     return sizeof(uint32_t);
 }
 

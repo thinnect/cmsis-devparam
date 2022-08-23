@@ -597,7 +597,7 @@ static void sleep_timer_fired_cb()
 bool devp_comms_init (comms_pool_t * p_pool)
 {
 	mp_pool = p_pool;
-
+	m_rcomm_keepalive_timeout = DEVP_DEFAULT_SLEEP_TIMEOUT_MS;
 	const osMutexAttr_t mutex_param = { .attr_bits = osMutexPrioInherit };
 
 	m_rx_mutex = osMutexNew(&mutex_param);
