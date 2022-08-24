@@ -1,7 +1,7 @@
 /**
  * Deviceparameter parameter to configure keep alive timeout for deviceparameter.
  * Is stored in persistent memory.
- * Default value currently set to 5 sec
+ * Default value currently set to 30 sec
  *
  * Copyright Thinnect Inc. 2022
  * @author Lembitu Valdmets
@@ -11,7 +11,7 @@
 
 
 #ifndef DEVP_SERVICE_TIMEOUT_MS
-#define DEVP_SERVICE_TIMEOUT_MS 5000
+#define DEVP_SERVICE_TIMEOUT_MS 30000
 #endif//DEVP_SERVICE_TIMEOUT_MS
 
 static uint32_t m_service_mode_timeout;
