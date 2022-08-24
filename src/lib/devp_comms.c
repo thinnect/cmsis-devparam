@@ -9,8 +9,11 @@
 
 #include "devp.h"
 #include "devp_comms.h"
-
 #include "endianness.h"
+
+#ifdef SERVICE_MODE_TIMEOUT
+#include "devp_service_timeout.h"
+#endif //SERVICE_MODE_TIMEOUT
 
 #include "loglevels.h"
 #define __MODUUL__ "dpc"
@@ -30,12 +33,13 @@
 #define DEVP_MAX_VALUE_SIZE 64
 #endif//DEVP_MAX_VALUE_SIZE
 
-#ifndef DEVP_SLEEP_TIMEOUT_MS
-#define DEVP_SLEEP_TIMEOUT_MS 30000
-#endif//DEVP_SLEEP_TIMEOUT_MS
+#ifndef DEVP_DEFAULT_SLEEP_TIMEOUT_MS
+#define DEVP_DEFAULT_SLEEP_TIMEOUT_MS 30000
+#endif//DEVP_DEFAULT_SLEEP_TIMEOUT_MS
 
 static osThreadId_t m_devp_thread_id;
 static osTimerId_t m_sleep_timer;
+static uint32_t m_rcomm_keepalive_timeout;
 
 static osMutexId_t m_rx_mutex;
 static comms_msg_t m_rx_msg; // We keep a dedicated message for RX purpose and do not use the pool
@@ -505,9 +509,16 @@ static void sleep_block_comms (comms_layer_t * p_comms)
 		{
 			if(NULL != mp_sleep_ctrl[i]) // Sleep control is optional
 			{
-				debug1("block %d", i);
+				#ifdef SERVICE_MODE_TIMEOUT
+				m_rcomm_keepalive_timeout = devp_service_mode_timeout_get();
+				#endif //SERVICE_MODE_TIMEOUT
+				if(!m_rcomm_keepalive_timeout)
+				{
+					m_rcomm_keepalive_timeout = DEVP_DEFAULT_SLEEP_TIMEOUT_MS;
+				}
+				debug1("block %d for %d sec", i, m_rcomm_keepalive_timeout/1000);
 				comms_sleep_block(mp_sleep_ctrl[i]);
-				osTimerStart(m_sleep_timer, DEVP_SLEEP_TIMEOUT_MS);
+				osTimerStart(m_sleep_timer, m_rcomm_keepalive_timeout);
 			}
 			break;
 		}
@@ -577,7 +588,6 @@ static void devp_comms_loop (void * arg)
 	}
 }
 
-
 static void sleep_timer_fired_cb()
 {
 	osThreadFlagsSet(m_devp_thread_id, DEVP_FLAGS_SLEEP);
@@ -587,7 +597,7 @@ static void sleep_timer_fired_cb()
 bool devp_comms_init (comms_pool_t * p_pool)
 {
 	mp_pool = p_pool;
-
+	m_rcomm_keepalive_timeout = DEVP_DEFAULT_SLEEP_TIMEOUT_MS;
 	const osMutexAttr_t mutex_param = { .attr_bits = osMutexPrioInherit };
 
 	m_rx_mutex = osMutexNew(&mutex_param);
