@@ -17,7 +17,7 @@ static int dp_battery_voltage_get (devp_t * param, void * value);
 
 static devp_t m_dp_battery_voltage =
 {
-    .name = "battery_vol_mW",
+    .name = "battery_vol_mV",
     .type = DP_TYPE_UINT16,
     .size = sizeof(uint16_t),
     .persist = false,
