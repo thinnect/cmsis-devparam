@@ -1,3 +1,13 @@
+/**
+ * @file devp_supply_voltage.c
+ * @author Lembitu Valdmets
+ * @brief Can access to supply voltage, uses sensors.c --> read_battery_universal for this.
+ * @version 0.1
+ * @date 2022-10-14
+ * @license priorietary
+ *
+ */
+
 #include "devp_supply_voltage.h"
 
 #include "sensors.h"
