@@ -13,6 +13,8 @@
 #include "sensors.h"
 #include "stdint.h"
 
+extern bool read_battery_voltage (uint16_t * voltage_mV);
+
 static int dp_battery_voltage_get (devp_t * param, void * value);
 
 static devp_t m_dp_battery_voltage =
