@@ -100,10 +100,12 @@ static bool scd_get(int32_t * pco2, uint16_t * ptmp, int32_t * phum)
     int32_t temp_samples_tmp;
     int32_t temp_samples_hum;
 
-    uint16_t scd4x_data_ready;
+    // uint16_t scd4x_data_ready;
     uint16_t error;
-    error = scd4x_get_data_ready_status(&scd4x_data_ready);
-    if (NO_ERROR == error)
+    bool data_ready;
+    // error = scd4x_get_data_ready_status(&scd4x_data_ready);
+    error = scd4x_get_data_ready_flag(&data_ready);
+    if ((NO_ERROR == error) && (true == data_ready))
     {
         error = scd4x_read_measurement(&temp_samples_co2, &temp_samples_tmp, &temp_samples_hum);
         if (NO_ERROR == error)
