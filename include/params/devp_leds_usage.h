@@ -1,7 +1,7 @@
 /**
  * Platform LED usage control through DeviceParamaters.
  *
- * Copyright Thinnect Inc. 2023
+ * Copyright Thinnect Inc. 2024
  * @license MIT
  */
 #ifndef DEVP_LEDS_USAGE_H_

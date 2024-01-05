@@ -2,7 +2,7 @@
  * Platform LED usage control through DeviceParamaters.
  * When usage is 0 then LEDs are not used in application
  * 
- * Copyright Thinnect Inc. 2023
+ * Copyright Thinnect Inc. 2024
  * @license MIT
  */
 
