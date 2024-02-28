@@ -54,42 +54,25 @@ static bool get_service_mode ()
 #ifndef TBCO2
 static bool scd_disable()
 {
-    ext_sensor_power_off();
-
-    RETARGET_I2CDeinit();
-
-    platform_i2c_release(RETARGET_I2C_DEV);
-
     return true;
 }
 
 static bool scd_enable()
 {
-    if(platform_i2c_request(RETARGET_I2C_DEV, 10000))
-    {
-        uint16_t error = 0;
-        RETARGET_I2CInit();
+    // uint16_t error = 0;
 
-        ext_sensor_power_on();
+    // Clean up potential SCD40 states
+    // scd4x_wake_up();
+    // scd4x_stop_periodic_measurement();
+    // scd4x_reinit();
 
-        osDelay(3000);
-
-        // Clean up potential SCD40 states
-        scd4x_wake_up();
-        scd4x_stop_periodic_measurement();
-        scd4x_reinit();
-
-        error = scd4x_start_periodic_measurement();
-        if (error)
-        {
-            warn1("scd4x_start_periodic_measurement: %i", error);
-        }
-    }
-    else
-    {
-        err1("I2C unavailable!");
-    }
-    return false;
+    // error = scd4x_start_periodic_measurement();
+    // if (error)
+    // {
+    //     warn1("scd4x_start_periodic_measurement: %i", error);
+    //     return false;
+    // }
+    return true;
 }
 #endif//TBCO2
 
