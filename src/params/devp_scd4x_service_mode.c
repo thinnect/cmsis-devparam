@@ -35,7 +35,7 @@
 #define SCD4X_CMD_SET_FORCED_RECALIBRATION 0x362F
 
 #ifndef TBCO2
-static bool m_scd_service_mode = false;
+static bool m_scd_service_mode = true;
 #endif//TBCO2
 
 static uint32_t m_scd_service_mode_start_s;
