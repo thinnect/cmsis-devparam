@@ -355,9 +355,9 @@ static int dp_scd4x_tempoffs_default_set (devp_t * param, bool init, const void 
 	return sizeof(int32_t);
 }
 
-void dp_scd4x_tempoffs_default_init ()
+void dp_scd4x_tempoffs_default_init (int32_t temp_offset)
 {
-    m_scd4x_tempoffs_default = 0;
+    m_scd4x_tempoffs_default = temp_offset;
     devp_register(&m_dp_scd4x_tempoffs_default);
 }
 
