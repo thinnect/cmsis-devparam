@@ -17,7 +17,7 @@ void devp_scd4x_service_mode_init ();
 /**
 * Initialize SCD4X default tempoffset
 */
-void dp_scd4x_tempoffs_default_init ();
+void dp_scd4x_tempoffs_default_init (int32_t temp_offset);
 
 int32_t devp_scd4x_tempoffs_default_get ();
 
