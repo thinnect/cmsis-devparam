@@ -204,7 +204,7 @@ bool devp_recover_migrate (void)
     {
         uint8_t data;
         spi_flash_lock();
-        spi_flash_read(0, DEVP_BACKUP_STORAGE_OFFSET + sizeof(hdr) + offs, 1, &data);
+        spi_flash_read(0, DEVP_BACKUP_STORAGE_OFFSET + offs, 1, &data);
         spi_flash_unlock();
 
         int32_t wr = fs_write(DEVP_STORAGE_FS_ID, fd, &data, 1);
@@ -213,6 +213,7 @@ bool devp_recover_migrate (void)
             debug1("wr %d", wr);
             return false;
         }
+        debug1("WR %x", data);
     }
 
     fs_close(DEVP_STORAGE_FS_ID, fd);
