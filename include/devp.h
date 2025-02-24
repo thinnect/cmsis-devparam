@@ -61,7 +61,7 @@ typedef void (* devp_changed_cb_f)(const char * name, void * user);
  * Initialize module. Make sure to call this immediately after the kernel is
  * started and before initializing any components that register parameters.
  */
-void devp_init ();
+bool devp_init ();
 
 /**
  * Perform garbage collection on the stored variables. Do this after all

@@ -11,6 +11,8 @@
 
 #include "node_lifetime.h"
 
-void devp_lifetime_init();
+void devp_lifetime_init(void);
+
+void devp_lifetime_boots_override (uint32_t boots);
 
 #endif//DEVP_LIFETIME_H_

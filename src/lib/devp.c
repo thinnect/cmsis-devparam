@@ -14,10 +14,10 @@
 static devp_t * mp_params;
 static devp_storage_t m_storage;
 
-void devp_init ()
+bool devp_init ()
 {
 	mp_params = NULL;
-	devp_storage_init(&m_storage);
+	return devp_storage_init(&m_storage);
 }
 
 void devp_gc ()

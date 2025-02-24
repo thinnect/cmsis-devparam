@@ -70,6 +70,11 @@ static int dp_boots_set (devp_t * param, bool init, const void * value, uint8_t 
 	}
 	return DEVP_EREADONLY;
 }
+
+void devp_lifetime_boots_override (uint32_t boots)
+{
+	m_lifetime_boots = boots;
+}
 // -----------------------------------------------------------------------------
 
 void devp_lifetime_init ()
@@ -86,8 +91,11 @@ void node_lifetime_sync ()
 	if (false == m_boots_stored) // Need to store only once per boot
 	{
 		uint32_t boots = node_lifetime_boots();
-		devp_store("boots", DP_TYPE_UINT32, &boots, sizeof(uint32_t));
-		m_boots_stored = true;
+		if (boots > 0)  // 0 is a special case
+		{
+			devp_store("boots", DP_TYPE_UINT32, &boots, sizeof(uint32_t));
+			m_boots_stored = true;
+		}
 	}
 }
 

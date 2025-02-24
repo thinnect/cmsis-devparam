@@ -8,6 +8,14 @@
 #ifndef DEVP_STORAGE_H_
 #define DEVP_STORAGE_H_
 
+#ifndef DEVP_STORAGE_FS_ID
+#define DEVP_STORAGE_FS_ID 0
+#endif//DEVP_STORAGE_FS_ID
+
+#ifndef DEVP_STORAGE_FNAME
+#define DEVP_STORAGE_FNAME "devp1"
+#endif//DEVP_STORAGE_FNAME
+
 #include <stdbool.h>
 #include <stdint.h>
 

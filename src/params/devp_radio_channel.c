@@ -40,6 +40,13 @@
 static devp_changed_cb_f m_changed_cb = NULL;
 static void * m_changed_user = NULL;
 
+static uint8_t m_radio_channel = 0;
+
+uint8_t get_radio_channel()
+{
+	return m_radio_channel;
+}
+
 #ifndef DEVP_RADIO_CHANNEL_ONLY
 //------------------------------------------------------------------------------
 static int dp_radio_ch_default_get(devp_t * param, void * value);
@@ -69,6 +76,9 @@ static int dp_radio_ch_default_set(devp_t * param, bool init, const void * value
 {
 	uint8_t ov = m_radio_ch_default;
 	m_radio_ch_default = *((uint8_t*)value);
+#if defined(DEVP_RADIO_CHANNEL_REQUIRE_REBOOT)
+	m_radio_channel = m_radio_ch_default; // Update boot-time default value as well
+#endif
 	if ((false == init)&&(ov != m_radio_ch_default)&&(NULL != m_changed_cb))
 	{
 		m_changed_cb(param->name, m_changed_user); // TODO Suspect this should be deferred?
@@ -100,13 +110,6 @@ static int dp_radio_ch_current_get(devp_t * param, void * value)
 }
 //------------------------------------------------------------------------------
 #endif//DEVP_RADIO_CHANNEL_ONLY
-
-static uint8_t m_radio_channel = 0;
-
-uint8_t get_radio_channel()
-{
-	return m_radio_channel;
-}
 
 #if !defined(DEVP_RADIO_CHANNEL_REQUIRE_REBOOT) || defined(DEVP_RADIO_CHANNEL_PERSISTENT)
 //------------------------------------------------------------------------------
@@ -152,10 +155,10 @@ void devp_radio_channel_init(get_radio_channel_f f_current, devp_changed_cb_f ca
 	mf_get_current = f_current;
 
 	devp_register(&m_dp_radio_ch_default);
-	if (0 == m_radio_ch_default) // Nothing was loaded from storage
+	if (0 == m_radio_ch_default) // Nothing was loaded from storage, store the default
 	{
-		m_radio_ch_default = DEFAULT_RADIO_CHANNEL;
-		int r = devp_store(m_dp_radio_ch_default.name, m_dp_radio_ch_default.type, &m_radio_ch_default, sizeof(uint8_t));
+		uint8_t radio_ch_default = DEFAULT_RADIO_CHANNEL;
+		int r = devp_store(m_dp_radio_ch_default.name, m_dp_radio_ch_default.type, &radio_ch_default, sizeof(uint8_t));
 		if (sizeof(uint8_t) == r)
 		{
 			debug1("dflt ch %d", (int)DEFAULT_RADIO_CHANNEL);

@@ -15,23 +15,35 @@
 #define __LOG_LEVEL__ (LOG_LEVEL_devp_storage & BASE_LOG_LEVEL)
 #include "log.h"
 
-#ifndef DEVP_STORAGE_FS_ID
-#define DEVP_STORAGE_FS_ID 0
-#endif//DEVP_STORAGE_FS_ID
-
-#ifndef DEVP_STORAGE_FNAME
-#define DEVP_STORAGE_FNAME "devp1"
-#endif//DEVP_STORAGE_FNAME
-
 bool devp_storage_init(devp_storage_t * strg)
 {
 	strg->f = (int32_t)fs_open(DEVP_STORAGE_FS_ID, DEVP_STORAGE_FNAME, SPIFFS_CREAT | SPIFFS_RDWR);
 	if (strg->f < 0)
 	{
-		warn1("fail");
-		return false;
+		warn1("fail %d", strg->f);
+		return false; // Run a filesystem check perhaps?
 	}
 	debug1("f=%d", (int)strg->f);
+
+	fs_stat stat;
+	int32_t res = fs_fstat(DEVP_STORAGE_FS_ID, strg->f, &stat);
+	if (res < 0)
+	{
+		err1("stat %d", (int)res);
+		return false; // Run a filesystem check perhaps?
+	}
+	debug1("s=%d", (int)stat.size);
+
+	if (stat.size > 0) // If it looks like there is data, we read the first byte
+	{
+		uint8_t data;
+		int32_t res = fs_read(DEVP_STORAGE_FS_ID, strg->f, &data, sizeof(data));
+		if (res < 0) // Might get SPIFFS_ERR_NOT_FINALIZED for example
+		{
+			err1("rd %d", (int)res);
+			return false; // In which case a filesystem check is needed
+		}
+	}
 	return true;
 }
 
@@ -124,7 +136,7 @@ static int find_parameter(fs_fd f, const char * name,
 			}
 			else
 			{
-				warn1("rlen %d", (int)record.tlen);
+				warn1("%s rlen %d, o: %d", name, (int)record.tlen, offs);
 				return -1;
 			}
 		}
