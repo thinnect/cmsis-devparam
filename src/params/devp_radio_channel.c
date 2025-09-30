@@ -76,7 +76,7 @@ static int dp_radio_ch_default_set(devp_t * param, bool init, const void * value
 {
 	uint8_t ov = m_radio_ch_default;
 	m_radio_ch_default = *((uint8_t*)value);
-#if defined(DEVP_RADIO_CHANNEL_REQUIRE_REBOOT)
+#if !defined(DEVP_RADIO_CHANNEL_REQUIRE_REBOOT)
 	m_radio_channel = m_radio_ch_default; // Update boot-time default value as well
 #endif
 	if ((false == init)&&(ov != m_radio_ch_default)&&(NULL != m_changed_cb))
