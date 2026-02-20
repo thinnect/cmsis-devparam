@@ -10,5 +10,6 @@
 #include <stdint.h>
 
 void devp_bootloader_init ();
+int devp_bootloader_get (char* version_str);
 
 #endif//DEVP_BOOTLOADER_H_

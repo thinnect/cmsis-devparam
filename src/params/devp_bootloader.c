@@ -105,3 +105,8 @@ void devp_bootloader_init ()
 {
 	devp_register(&m_dp_bootloader);
 }
+
+int devp_bootloader_get (char* version_str)
+{
+	return dp_bootloader_get(NULL, (void*)version_str);
+}
